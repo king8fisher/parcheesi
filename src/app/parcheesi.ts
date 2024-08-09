@@ -206,8 +206,8 @@ export abstract class ButtonBehaviorContainer extends PIXI.Container {
 
 	abstract hoverChanged(): void;
 
-	private static mouseDownOn: PIXI.Container = null;
-	private hovered: boolean;
+	private static mouseDownOn: PIXI.Container | null = null;
+	private hovered: boolean = false;
 
 	public isHovered() {
 		return this.hovered;
@@ -343,8 +343,8 @@ export class Piece extends PIXI.Container implements OnResize {
 	// }
 
 	prevPathIndex: number;
-	prevPositionX: number;
-	prevPositionY: number;
+	prevPositionX: number = 0;
+	prevPositionY: number = 0;
 	tweenTimeStart: number = -1;
 	tweenTimeEnd: number = -1;
 
@@ -441,13 +441,21 @@ export class Dice extends PIXI.Container implements OnResize {
 
 	button: DiceButtonBehavior;
 
-	private rolledNumber: number;
-	bonusNumber: number;
+	private rolledNumber: number = 1; // TODO(next) This used to be undefined
+	private _bonusNumber: number = 0;
+
+	get bonusNumber() {
+		return this._bonusNumber;
+	}
+
+	set bonusNumber(v: number) {
+		this._bonusNumber = v;
+	}
 
 	// To simplify calculation of how far this dice can go
 	currentDiceNumber(): number {
-		if (this.bonusNumber > 0) {
-			return this.bonusNumber;
+		if (this._bonusNumber > 0) {
+			return this._bonusNumber;
 		}
 		return this.rolledNumber;
 	}
@@ -456,7 +464,15 @@ export class Dice extends PIXI.Container implements OnResize {
 		return this.rolledNumber;
 	}
 
-	used: boolean;
+	private _used: boolean = false;
+
+	get used() {
+		return this._used;
+	}
+
+	set used(v: boolean) {
+		this._used = v;
+	}
 
 	// internalGroupIndex represents each color's piece index, [0..4)
 	constructor(board: GameBoard, internalDiceIndex: number) {
@@ -489,8 +505,8 @@ export class Dice extends PIXI.Container implements OnResize {
 
 	rollTheDice() {
 		this.rolledNumber = Math.floor(Math.random() * 6) + 1;
-		this.bonusNumber = 0;
-		this.used = false;
+		this._bonusNumber = 0;
+		this._used = false;
 		if (this.internalDiceIndex == 0) {
 			playSound(`dice-${Math.floor(Math.random() * DICE_SOUND_COUNT)}`);
 		}
@@ -526,7 +542,7 @@ export class Dice extends PIXI.Container implements OnResize {
 
 		this.sprite.width = D.CELL_HEIGHT * 2;
 		this.sprite.height = D.CELL_HEIGHT * 2;
-		this.sprite.tint = (this.used ? diceUsedColor : diceUnusedColor);
+		this.sprite.tint = (this._used ? diceUsedColor : diceUnusedColor);
 		this.sprite.visible = this.board.wonColorIndex < 0;
 
 		// Rotate dice toward the player
@@ -837,7 +853,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	cog: Cog;
 
-	pieceSelected: Piece = null;
+	pieceSelected: Piece | null = null;
 
 	startGameButton: ButtonBehaviorContainer;
 
@@ -1141,7 +1157,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		}
 	}
 
-	private _useDiceAtSelectedPieceIfAllowed(piece: Piece, dice: Dice, performTheMove: boolean): MoveResult {
+	private _useDiceAtSelectedPieceIfAllowed(piece: Piece | null, dice: Dice, performTheMove: boolean): MoveResult {
 		if (piece == null) {
 			return { success: false, bonus: 0 };
 		}
@@ -1371,7 +1387,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	// Get piece on the local color's path. Returns null if not
 	// occupied
-	private getPieceOnPath(colorIndex: number, pathIndex: number): Piece {
+	private getPieceOnPath(colorIndex: number, pathIndex: number): Piece | null {
 		let globalCellIndex = GameBoard.getGlobalCellIndex(colorIndex, pathIndex);
 		if (globalCellIndex < 0) {
 			return null;

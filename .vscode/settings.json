@@ -86,6 +86,7 @@
   ],
   "formatFiles.extensionsToInclude": "ts,tsx",
   "cSpell.words": [
+    "PIXI"
   ],
  "cSpell.ignoreWords": [
     "clsx"
