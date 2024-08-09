@@ -380,6 +380,6 @@ export var tweenFunctions = {
 	}
 };
 
-export function hex2string(hex: number) {
-	return '#' + ('000000' + (hex | 0).toString(16)).slice(-6);
-}
+// export function hex2string(hex: number) {
+// 	return '#' + ('000000' + (hex | 0).toString(16)).slice(-6);
+// }

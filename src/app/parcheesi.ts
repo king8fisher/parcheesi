@@ -1,6 +1,10 @@
 import * as PIXI from 'pixi.js';
 import * as Color from "color/index";
 
+import { Rectangle, settings, ALPHA_MODES, utils } from '@pixi/core';
+
+const { hex2string } = utils;
+
 import {
 	WH_IMAGE_RATIO,
 	DICE_SOUND_COUNT,
@@ -15,7 +19,7 @@ import {
 	toggleMuteUnmute,
 	IMAGE_ALIASES
 } from "./main";
-import { hex2string, tweenFunctions } from "./util";
+import { tweenFunctions } from "./util";
 import {
 	ALLOW_SKIP_AFTER_FIRST_MOVE,
 	backgroundBoxColor, bgColor, BONUS_CAN_BE_SKIPPED,
