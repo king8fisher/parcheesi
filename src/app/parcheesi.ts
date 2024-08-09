@@ -1,25 +1,10 @@
-import * as PIXI from 'pixi.js';
 import * as Color from "color/index";
+import * as PIXI from 'pixi.js';
 
-import { Rectangle, settings, ALPHA_MODES, utils } from '@pixi/core';
+import { utils } from '@pixi/core';
 
 const { hex2string } = utils;
 
-import {
-	WH_IMAGE_RATIO,
-	DICE_SOUND_COUNT,
-	PIECE_SOUND_COUNT,
-
-	ResolutionChangeMode,
-	ResolutionChangeBehavior,
-
-	playSound,
-	unmuteIfVolumeUp,
-	isMuted,
-	toggleMuteUnmute,
-	IMAGE_ALIASES
-} from "./main";
-import { tweenFunctions } from "./util";
 import {
 	ALLOW_SKIP_AFTER_FIRST_MOVE,
 	backgroundBoxColor, bgColor, BONUS_CAN_BE_SKIPPED,
@@ -32,6 +17,21 @@ import {
 	regularCellColor,
 	safeCellColor, settingsButtonsColor
 } from "./constants";
+
+import {
+	DICE_SOUND_COUNT,
+	IMAGE_ALIASES,
+	isMuted,
+	PIECE_SOUND_COUNT,
+	playSound,
+	ResolutionChangeBehavior,
+	ResolutionChangeMode,
+	toggleMuteUnmute,
+	unmuteIfVolumeUp,
+	WH_IMAGE_RATIO
+} from "./main";
+
+import { tweenFunctions } from "./util";
 
 export enum OnResizeFlag {
 	SIZE = 0x01,
@@ -364,7 +364,8 @@ export class Piece extends PIXI.Container implements OnResize {
 			this.prevPathIndex = this.pathIndex;
 		}
 
-		let desiredDestinationPosition = this.position;
+		let desiredDestinationPosition = new PIXI.Point(this.position.x, this.position.y);
+
 		if (this.pathIndex < 0) {
 			// Home
 			desiredDestinationPosition = GameBoard.homeGlobalPositions[this.colorIndex][this.internalColorGroupIndex];
@@ -397,9 +398,11 @@ export class Piece extends PIXI.Container implements OnResize {
 		} else {
 			this.overlay.beginFill(playerColors[this.colorIndex]);
 			if (this == this.board.pieceSelected) {
-				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceSelectedBorderColor, 1, 1);
+				this.overlay.alpha = 1;
+				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceSelectedBorderColor, 1);
 			} else {
-				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceNonSelectedBorderColor, 1, 0.5);
+				this.overlay.alpha = 0.5;
+				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceNonSelectedBorderColor, 1);
 			}
 		}
 		this.overlay.drawCircle(0, 0, D.CELL_HEIGHT * 0.35);
@@ -485,7 +488,9 @@ export class Dice extends PIXI.Container implements OnResize {
 		this.addChild(this.overlay);
 
 		this.sprite = PIXI.Sprite.from(IMAGE_ALIASES["dice"]); // TODO(next): Why did we clone? new PIXI.Sprite(board.loader.resources["dice"].texture.clone() /*to frame them separately*/); // .texture accesses the pixel data
-		this.sprite.texture.frame = new PIXI.Rectangle(0, 0, diceImageCellSize, diceImageCellSize);
+		this.sprite.texture.dynamic = true;
+		this.sprite.texture.frame.copyFrom(new PIXI.Rectangle(0, 0, diceImageCellSize, diceImageCellSize));
+		this.sprite.texture.updateUvs();
 		// TO prevent bleeding of pixelated textures, use PIXI.SCALE_MODES.NEAREST:
 		this.sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR; //  floating-point values for scaling
 		// Rotate around the center
@@ -538,7 +543,8 @@ export class Dice extends PIXI.Container implements OnResize {
 		} else if (currentDiceNumber == BONUS_FOR_KNOCKING_OPPONENT) {
 			frameIndex = 7;
 		}
-		this.sprite.texture.frame = new PIXI.Rectangle((frameIndex * diceImageCellSize) % (diceImageCellSize * diceImageCellsCount), 0, diceImageCellSize, diceImageCellSize);
+		this.sprite.texture.frame.copyFrom(new PIXI.Rectangle((frameIndex * diceImageCellSize) % (diceImageCellSize * diceImageCellsCount), 0, diceImageCellSize, diceImageCellSize));
+		this.sprite.texture.updateUvs();
 
 		this.sprite.width = D.CELL_HEIGHT * 2;
 		this.sprite.height = D.CELL_HEIGHT * 2;
@@ -1614,7 +1620,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			graphics.beginFill(color.rgbNumber(), alpha);
 			let width = D.CELL_WIDTH * 3;
 			let height = D.CELL_HEIGHT * 7;
-			graphics.blendMode = PIXI.BLEND_MODES.EXCLUSION;
+			graphics.blendMode = 'exclusion';
 			graphics.pivot.set(0, 0);
 			graphics.position.set(0, 0);
 			let overlappingBorder = D.CELL_HEIGHT / 2;
@@ -1681,7 +1687,7 @@ export class Cog extends PIXI.Container implements OnResize {
 
 		this.cogSprite = PIXI.Sprite.from(IMAGE_ALIASES["cog"]);
 		this.cogSprite.anchor.set(0.5, 0.5);
-		this.cogSprite.blendMode = PIXI.BLEND_MODES.ADD_NPM;
+		this.cogSprite.blendMode = 'add-npm';
 		//this.cogSprite.tint = cogColor
 		this.addChild(this.cogSprite);
 
@@ -1714,7 +1720,7 @@ export class Cog extends PIXI.Container implements OnResize {
 
 		this.muteSprite = new PIXI.Sprite();
 		this.muteSprite.anchor.set(0.5, 0.5);
-		this.muteSprite.blendMode = PIXI.BLEND_MODES.ADD_NPM;
+		this.muteSprite.blendMode = 'add-npm';
 		this.addChild(this.muteSprite);
 		this.muteSprite.addChild(new class extends ButtonBehaviorContainer {
 			owner: Cog;
@@ -1783,7 +1789,7 @@ export class Cog extends PIXI.Container implements OnResize {
 			(this.cogSprite.width / 2) / this.cogSprite.scale.x,
 			(this.cogSprite.height / 2) / this.cogSprite.scale.y);
 
-		this.muteSprite.texture = isMuted() ? this.loader.resources["sound-off"].texture : this.loader.resources["sound-on"].texture;
+		this.muteSprite.texture = isMuted() ? PIXI.Texture.from(IMAGE_ALIASES["sound-off"]) : PIXI.Texture.from(IMAGE_ALIASES["sound-on"]);
 		this.muteSprite.width = width;
 		this.muteSprite.height = width;
 		this.muteSprite.position.set(this.cogSprite.width / 2 + cogGap, cogGap + this.cogSprite.height / 2);
@@ -1793,7 +1799,7 @@ export class Cog extends PIXI.Container implements OnResize {
 			(this.muteSprite.height / 2) / this.muteSprite.scale.y);
 
 		if (this.menu.visible) {
-			this.gameBoardBase.filter([new PIXI.filters.BlurFilter(5, 10)]);
+			this.gameBoardBase.filter([new PIXI.BlurFilter(5, 10)]);
 		} else {
 			this.gameBoardBase.filter([]);
 		}
