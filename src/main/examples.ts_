@@ -1,0 +1,103 @@
+import * as PIXI from "pixi.js";
+
+function drawText(renderer: PIXI.Renderer, stage: PIXI.Container) {
+	const basicText = new PIXI.Text('Parcheesi', new PIXI.TextStyle({
+		fontFamily: "Arial",
+		fill: 'white',
+		fontSize: 20,
+		fontWeight: 'bold',
+	}));
+	basicText.x = 50;
+	basicText.y = 100;
+
+	stage.addChild(basicText);
+
+	const style = new PIXI.TextStyle({
+		fontFamily: 'Arial',
+		fontSize: 36,
+		fontStyle: 'italic',
+		fontWeight: 'bold',
+		fill: ['#ffffff', '#00ff99'], // gradient
+		stroke: '#4a1850',
+		strokeThickness: 5,
+		dropShadow: true,
+		dropShadowColor: '#000000',
+		dropShadowBlur: 4,
+		dropShadowAngle: Math.PI / 6,
+		dropShadowDistance: 6,
+		wordWrap: true,
+		wordWrapWidth: 440,
+	});
+
+	const richText = new PIXI.Text('Game begins', style);
+	richText.x = 50;
+	richText.y = 250;
+
+	stage.addChild(richText);
+}
+
+function drawSimplePlane(renderer: PIXI.Renderer, stage: PIXI.Container, loader: PIXI.Loader) {
+	let plane = new PIXI.SimplePlane(loader.resources["cat"].texture, 2, 2);
+	plane.x = 100
+	plane.y = 100
+	plane.scale.set(2, 2)
+	stage.addChild(plane)
+	const buffer = plane.geometry.getBuffer('aVertexPosition'); // vertex positions
+	let planeTicker = new PIXI.Ticker();
+	console.log((<Float32Array>buffer.data).length)
+
+	let originals = buffer.data;
+
+	let planeTickerDelta = 0.0
+	let speed = 0.1;
+
+	planeTicker.add((delta) => {
+		// Basically we have (x,y) tuples of float32 per vertex
+		let len = (<Float32Array>buffer.data).length;
+		for (let i = 0; i < len; i++) {
+			if (i % 2 == 1) {
+				(<Float32Array>buffer.data)[i] = (<Float32Array>originals)[i] + 1 * Math.sin(planeTickerDelta * speed); //(Math.random() - 0.5);
+			}
+		}
+		(<Float32Array>buffer.data)[0] = (<Float32Array>originals)[0] + -1 * Math.sin(planeTickerDelta * speed);
+		(<Float32Array>buffer.data)[2] = (<Float32Array>originals)[2] + 1 * Math.sin(planeTickerDelta * speed);
+		planeTickerDelta += delta;
+		buffer.update();
+	})
+	planeTicker.start()
+}
+
+export default class Tiling extends PIXI.TilingSprite {
+	constructor(texture: PIXI.Texture, width?: number, height?: number) {
+		super(texture, width, height);
+	}
+
+	onResize(width: number, height: number) {
+		this.width = width;
+	}
+
+	onUpdate(delta: number) {
+		this.tilePosition.x -= delta * 0.5;
+	}
+}
+
+function addOrUpdateBackground(stage: PIXI.Container, loader: PIXI.Loader, w: number, h: number): Tiling {
+	let indexAt = -1
+	try {
+		let bgPrev = stage.getChildByName("bg")
+		let index = stage.getChildIndex(bgPrev)
+		indexAt = index
+	} catch (err) {
+	}
+
+	let bg = new Tiling(loader.resources["bg"].texture, w, h)
+	bg.zIndex = -999;
+	bg.name = "bg";
+	if (indexAt < 0) {
+		stage.addChild(bg);
+	} else {
+		stage.addChildAt(bg, indexAt);
+	}
+	return bg;
+}
+
