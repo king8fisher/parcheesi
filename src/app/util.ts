@@ -1,17 +1,17 @@
 export function clamp(min: number, max: number, value: number): number {
-	if (value<min) return min
-	if (value>max) return max
-	return value
+	if (value < min) return min;
+	if (value > max) return max;
+	return value;
 }
 
 export function floatMod(a: number, b: number): number {
-	a /= b
-	a -= Math.floor(a)
-	return a*b
+	a /= b;
+	a -= Math.floor(a);
+	return a * b;
 }
 
-export function getLinearY(x0: number, y0: number, x1: number, y1: number, x:number): number {
-	return (y1-y0)*(x-x0)*(x-x0)/(x1-x0)+y0
+export function getLinearY(x0: number, y0: number, x1: number, y1: number, x: number): number {
+	return (y1 - y0) * (x - x0) * (x - x0) / (x1 - x0) + y0;
 }
 
 // Basic lerp funtion.
@@ -61,8 +61,7 @@ function updateTransformOnlyTranslate(parentTransform: PIXI.Transform) {
 	// SAME CODE AS IN DEFAULT UPDATE TRANSFORM
 	const lt = this.localTransform;
 
-	if (this._localID !== this._currentLocalID)
-	{
+	if (this._localID !== this._currentLocalID) {
 		lt.a = this._cx * this.scale._x;
 		lt.b = this._sx * this.scale._x;
 		lt.c = this._cy * this.scale._y;
@@ -74,8 +73,7 @@ function updateTransformOnlyTranslate(parentTransform: PIXI.Transform) {
 		this._parentID = -1;
 	}
 
-	if (this._parentID !== (<any>parentTransform)._worldID)
-	{
+	if (this._parentID !== (<any>parentTransform)._worldID) {
 		// concat the parent matrix with the objects transform.
 		const pt = parentTransform.worldTransform;
 		const wt = this.worldTransform;
@@ -108,22 +106,22 @@ function hackTransform(element: PIXI.Container) {
 
 export var tweenFunctions = {
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	linear: function(t: number, b: number, _c: number, d: number) {
+	linear: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * t / d + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInQuad: function(t: number, b: number, _c: number, d: number) {
+	easeInQuad: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * (t /= d) * t + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutQuad: function(t: number, b: number, _c: number, d: number) {
+	easeOutQuad: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return -c * (t /= d) * (t - 2) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutQuad: function(t: number, b: number, _c: number, d: number) {
+	easeInOutQuad: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d / 2) < 1) {
 			return c / 2 * t * t + b;
@@ -132,17 +130,17 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInCubic: function(t: number, b: number, _c: number, d: number) {
+	easeInCubic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * (t /= d) * t * t + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutCubic: function(t: number, b: number, _c: number, d: number) {
+	easeOutCubic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * ((t = t / d - 1) * t * t + 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutCubic: function(t: number, b: number, _c: number, d: number) {
+	easeInOutCubic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d / 2) < 1) {
 			return c / 2 * t * t * t + b;
@@ -151,17 +149,17 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInQuart: function(t: number, b: number, _c: number, d: number) {
+	easeInQuart: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * (t /= d) * t * t * t + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutQuart: function(t: number, b: number, _c: number, d: number) {
+	easeOutQuart: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return -c * ((t = t / d - 1) * t * t * t - 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutQuart: function(t: number, b: number, _c: number, d: number) {
+	easeInOutQuart: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d / 2) < 1) {
 			return c / 2 * t * t * t * t + b;
@@ -170,17 +168,17 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInQuint: function(t: number, b: number, _c: number, d: number) {
+	easeInQuint: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * (t /= d) * t * t * t * t + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutQuint: function(t: number, b: number, _c: number, d: number) {
+	easeOutQuint: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutQuint: function(t: number, b: number, _c: number, d: number) {
+	easeInOutQuint: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d / 2) < 1) {
 			return c / 2 * t * t * t * t * t + b;
@@ -189,32 +187,32 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInSine: function(t: number, b: number, _c: number, d: number) {
+	easeInSine: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutSine: function(t: number, b: number, _c: number, d: number) {
+	easeOutSine: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * Math.sin(t / d * (Math.PI / 2)) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutSine: function(t: number, b: number, _c: number, d: number) {
+	easeInOutSine: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInExpo: function(t: number, b: number, _c: number, d: number) {
+	easeInExpo: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
-		return (t==0) ? b : c * Math.pow(2, 10 * (t/d - 1)) + b;
+		return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutExpo: function(t: number, b: number, _c: number, d: number) {
+	easeOutExpo: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
-		return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+		return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutExpo: function(t: number, b: number, _c: number, d: number) {
+	easeInOutExpo: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if (t === 0) {
 			return b;
@@ -229,17 +227,17 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInCirc: function(t: number, b: number, _c: number, d: number) {
+	easeInCirc: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutCirc: function(t: number, b: number, _c: number, d: number) {
+	easeOutCirc: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutCirc: function(t: number, b: number, _c: number, d: number) {
+	easeInOutCirc: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d / 2) < 1) {
 			return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
@@ -248,7 +246,7 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInElastic: function(t: number, b: number, _c: number, d: number) {
+	easeInElastic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		let a, p, s;
 		s = 1.70158;
@@ -271,7 +269,7 @@ export var tweenFunctions = {
 		return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutElastic: function(t: number, b: number, _c: number, d: number) {
+	easeOutElastic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		let a, p, s;
 		s = 1.70158;
@@ -294,7 +292,7 @@ export var tweenFunctions = {
 		return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutElastic: function(t: number, b: number, _c: number, d: number) {
+	easeInOutElastic: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		let a, p, s;
 		s = 1.70158;
@@ -321,7 +319,7 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInBack: function(t: number, b: number, _c: number, d: number, s: number) {
+	easeInBack: function (t: number, b: number, _c: number, d: number, s: number) {
 		let c = _c - b;
 		if (s === void 0) {
 			s = 1.70158;
@@ -329,7 +327,7 @@ export var tweenFunctions = {
 		return c * (t /= d) * t * ((s + 1) * t - s) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutBack: function(t: number, b: number, _c: number, d: number, s: number) {
+	easeOutBack: function (t: number, b: number, _c: number, d: number, s: number) {
 		let c = _c - b;
 		if (s === void 0) {
 			s = 1.70158;
@@ -337,7 +335,7 @@ export var tweenFunctions = {
 		return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutBack: function(t: number, b: number, _c: number, d: number, s: number) {
+	easeInOutBack: function (t: number, b: number, _c: number, d: number, s: number) {
 		let c = _c - b;
 		if (s === void 0) {
 			s = 1.70158;
@@ -349,14 +347,14 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInBounce: function(t: number, b: number, _c: number, d: number) {
+	easeInBounce: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		let v;
 		v = tweenFunctions.easeOutBounce(d - t, 0, c, d);
 		return c - v + b;
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeOutBounce: function(t: number, b: number, _c: number, d: number) {
+	easeOutBounce: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		if ((t /= d) < 1 / 2.75) {
 			return c * (7.5625 * t * t) + b;
@@ -369,7 +367,7 @@ export var tweenFunctions = {
 		}
 	},
 	// t - current time, b - beginning value, _c - final value, d - total duration
-	easeInOutBounce: function(t: number, b: number, _c: number, d: number) {
+	easeInOutBounce: function (t: number, b: number, _c: number, d: number) {
 		let c = _c - b;
 		let v;
 		if (t < d / 2) {
@@ -381,3 +379,7 @@ export var tweenFunctions = {
 		}
 	}
 };
+
+export function hex2string(hex: number) {
+	return '#' + ('000000' + (hex | 0).toString(16)).slice(-6);
+}
