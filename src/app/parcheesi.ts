@@ -172,9 +172,10 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 		}
 		this.endFill();
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
-			this.beginHole();
+			//this.beginHole(); // TODO(next)
 			this.drawStar(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 9, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 8);
-			this.endHole();
+			this.cut();
+			//this.endHole(); // TODO(next)
 		}
 	}
 
@@ -1813,12 +1814,13 @@ export class Menu extends PIXI.Container implements OnResize {
 			viewportSize.x - bgGap * 2,
 			viewportSize.y - bgGap * 2, bgGap * 2);
 		this.graphics.endFill();
-		this.graphics.beginHole();
+		// this.graphics.beginHole(); // TODO(next)
 		let width = this.cog.getCogWidth();
 		let height = width / WH_IMAGE_RATIO["cog"];
 		let gap = this.cog.getCogGap();
 		this.graphics.drawEllipse(viewportSize.x - width / 2 - gap, gap + height / 2, (width / 2) * 1.5, (height / 2) * 1.5);
-		this.graphics.endHole();
+		// this.graphics.endHole(); // TODO(next)
+		this.graphics.cut();
 		this.restartButton.onResize(flag);
 	}
 }
