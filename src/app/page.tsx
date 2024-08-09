@@ -1,7 +1,16 @@
+import dynamic from 'next/dynamic';
+import GameCanvas from "../components/GameCanvas";
+
+const GameCanvasNoSSR = dynamic(() => import('../components/GameCanvas'), { ssr: false, loading: () => <div>Loading...</div> });
+
+// const GameCanvasNoSSR = dynamic(() => Promise.resolve(GameCanvas), {
+//   ssr: false,
+// });
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="h-screen w-screen">
+      <GameCanvas />
     </main>
   );
 }
