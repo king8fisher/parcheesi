@@ -12,7 +12,8 @@ import {
 	playSound,
 	unmuteIfVolumeUp,
 	isMuted,
-	toggleMuteUnmute
+	toggleMuteUnmute,
+	IMAGE_ALIASES
 } from "./main";
 import { hex2string, tweenFunctions } from "./util";
 import {
@@ -462,7 +463,7 @@ export class Dice extends PIXI.Container implements OnResize {
 
 		this.addChild(this.overlay);
 
-		this.sprite = new PIXI.Sprite(board.loader.resources["dice"].texture.clone() /*to frame them separately*/); // .texture accesses the pixel data
+		this.sprite = PIXI.Sprite.from(IMAGE_ALIASES["dice"]); // TODO(next): Why did we clone? new PIXI.Sprite(board.loader.resources["dice"].texture.clone() /*to frame them separately*/); // .texture accesses the pixel data
 		this.sprite.texture.frame = new PIXI.Rectangle(0, 0, diceImageCellSize, diceImageCellSize);
 		// TO prevent bleeding of pixelated textures, use PIXI.SCALE_MODES.NEAREST:
 		this.sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR; //  floating-point values for scaling
@@ -573,7 +574,7 @@ export class Skip extends PIXI.Container implements OnResize {
 		this.button.hitArea = new PIXI.Rectangle(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT);
 		this.addChild(this.button);
 
-		let text = new PIXI.Sprite(this.board.loader.resources["skip"].texture);
+		let text = PIXI.Sprite.from(IMAGE_ALIASES["skip"]);
 		text.anchor.set(0.5, 0.5);
 		this.button.addChild(text);
 
@@ -583,9 +584,9 @@ export class Skip extends PIXI.Container implements OnResize {
 	onResize(flag: OnResizeFlag): void {
 		let width = D.CELL_WIDTH * 0.8;
 		let text = <PIXI.Sprite>this.button.getChildAt(0);
-		let imageName = "skip";
-		let ratio = WH_IMAGE_RATIO[imageName];
-		text.texture = this.board.loader.resources[imageName].texture;
+		let imageAlias = "skip";
+		let ratio = WH_IMAGE_RATIO[imageAlias];
+		text.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 		text.width = width * 0.7;
 		text.height = text.width / ratio;
 	}
@@ -965,7 +966,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		this.startGameButton.addChild(graphics);
 		this.addChild(this.startGameButton);
 
-		let text = new PIXI.Sprite(loader.resources["again"].texture);
+		let text = PIXI.Sprite.from(IMAGE_ALIASES["again"]);
 		text.anchor.set(0.5, 0.5);
 		this.startGameButton.addChild(text);
 		this.addChild(this.startGameButton);
@@ -1426,9 +1427,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		this.startGameButton.position.set(viewportSize.x / 2, viewportSize.y / 2);
 
 		let text = <PIXI.Sprite>this.startGameButton.getChildAt(1);
-		let imageName = "again";
-		let ratio = WH_IMAGE_RATIO[imageName];
-		text.texture = this.loader.resources[imageName].texture;
+		let imageAlias = "again";
+		let ratio = WH_IMAGE_RATIO[imageAlias];
+		text.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 		text.width = width * 0.7;
 		text.height = text.width / ratio;
 
@@ -1608,8 +1609,8 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		this.startGameButtonGraphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
 		this.startGameButtonGraphics.endFill();
 
-		// let imageName = "cog"
-		// let ratio = WH_IMAGE_RATIO[imageName]
+		// let imageAlias = "cog"
+		// let ratio = WH_IMAGE_RATIO[imageAlias]
 		//
 		// this.cog.width = width / 3
 		// this.cog.height = this.cog.width / ratio
@@ -1618,9 +1619,9 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		// // GOTCHA: Parent's scale makes child scale smaller correspondingly
 		// this.cog.getChildAt(0).hitArea = new PIXI.Ellipse(0,0,(width / 5) / this.cog.scale.x, (width / 5) / this.cog.scale.y)
 
-		let imageName = this.isReadyToStart() ? "start" : "select";
-		let ratio = WH_IMAGE_RATIO[imageName];
-		this.startGameButtonText.texture = this.loader.resources[imageName].texture;
+		let imageAlias = this.isReadyToStart() ? "start" : "select";
+		let ratio = WH_IMAGE_RATIO[imageAlias];
+		this.startGameButtonText.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 
 		this.startGameButtonText.width = width * 0.8;
 		this.startGameButtonText.height = this.startGameButtonText.width / ratio;
@@ -1657,7 +1658,7 @@ export class Cog extends PIXI.Container implements OnResize {
 		this.loader = gameBoardBase.loader;
 		this.gameBoardBase = gameBoardBase;
 
-		this.cogSprite = new PIXI.Sprite(this.loader.resources["cog"].texture);
+		this.cogSprite = PIXI.Sprite.from(IMAGE_ALIASES["cog"]);
 		this.cogSprite.anchor.set(0.5, 0.5);
 		this.cogSprite.blendMode = PIXI.BLEND_MODES.ADD_NPM;
 		//this.cogSprite.tint = cogColor
@@ -1830,7 +1831,7 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.graphics = new PIXI.Graphics();
 		this.addChild(this.graphics);
 
-		this.sprite = new PIXI.Sprite(menu.cog.loader.resources["settings-restart"].texture);
+		this.sprite = PIXI.Sprite.from(IMAGE_ALIASES["settings-restart"]);
 		this.sprite.tint = bgColor;
 		this.addChild(this.sprite);
 		this.graphics.addChild(new class extends ButtonBehaviorContainer {
