@@ -25,84 +25,84 @@ export function backout(amount: number) {
 	return (t: number) => (--t * t * ((amount + 1) * t + amount) + 1);
 }
 
-export function destroyAllImages() {
-	Object.keys(PIXI.utils.TextureCache).forEach(texture => {
-		console.log("Destroying..." + texture);
-		try {
-			PIXI.utils.TextureCache[texture].destroy(true);
-		} catch {
-		}
-	});
-}
+// export function destroyAllImages() {
+// 	Object.keys(PIXI.utils.TextureCache).forEach(texture => {
+// 		console.log("Destroying..." + texture);
+// 		try {
+// 			PIXI.utils.TextureCache[texture].destroy(true);
+// 		} catch {
+// 		}
+// 	});
+// }
 
-export function frame(source: any, x: number, y: number, width: number, height: number): PIXI.Texture {
-	let texture: PIXI.Texture;
-	//If the source is a string, it's either a texture in the
-	//cache or an image file
-	if (typeof source === "string") {
-		if (PIXI.utils.TextureCache[source]) {
-			texture = new PIXI.Texture(PIXI.utils.TextureCache[source]);
-		}
-	}//If the `source` is a texture,  use it
-	else if (source instanceof PIXI.Texture) {
-		texture = new PIXI.Texture((source as PIXI.Texture).baseTexture);
-	}
-	if (!texture) {
-		console.log(`Please load the ${source} texture into the cache.`);
-	} else {
-		//Make a rectangle the size of the sub-image
-		texture.frame = new PIXI.Rectangle(x, y, width, height);
-		return texture;
-	}
-	return null;
-}
+// export function frame(source: any, x: number, y: number, width: number, height: number): PIXI.Texture {
+// 	let texture: PIXI.Texture;
+// 	//If the source is a string, it's either a texture in the
+// 	//cache or an image file
+// 	if (typeof source === "string") {
+// 		if (PIXI.utils.TextureCache[source]) {
+// 			texture = new PIXI.Texture(PIXI.utils.TextureCache[source]);
+// 		}
+// 	}//If the `source` is a texture,  use it
+// 	else if (source instanceof PIXI.Texture) {
+// 		texture = new PIXI.Texture((source as PIXI.Texture).baseTexture);
+// 	}
+// 	if (!texture) {
+// 		console.log(`Please load the ${source} texture into the cache.`);
+// 	} else {
+// 		//Make a rectangle the size of the sub-image
+// 		texture.frame = new PIXI.Rectangle(x, y, width, height);
+// 		return texture;
+// 	}
+// 	return null;
+// }
 
-function updateTransformOnlyTranslate(parentTransform: PIXI.Transform) {
-	// SAME CODE AS IN DEFAULT UPDATE TRANSFORM
-	const lt = this.localTransform;
+// function updateTransformOnlyTranslate(parentTransform: PIXI.Transform) {
+// 	// SAME CODE AS IN DEFAULT UPDATE TRANSFORM
+// 	const lt = this.localTransform;
 
-	if (this._localID !== this._currentLocalID) {
-		lt.a = this._cx * this.scale._x;
-		lt.b = this._sx * this.scale._x;
-		lt.c = this._cy * this.scale._y;
-		lt.d = this._sy * this.scale._y;
+// 	if (this._localID !== this._currentLocalID) {
+// 		lt.a = this._cx * this.scale._x;
+// 		lt.b = this._sx * this.scale._x;
+// 		lt.c = this._cy * this.scale._y;
+// 		lt.d = this._sy * this.scale._y;
 
-		lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
-		lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
-		this._currentLocalID = this._localID;
-		this._parentID = -1;
-	}
+// 		lt.tx = this.position._x - ((this.pivot._x * lt.a) + (this.pivot._y * lt.c));
+// 		lt.ty = this.position._y - ((this.pivot._x * lt.b) + (this.pivot._y * lt.d));
+// 		this._currentLocalID = this._localID;
+// 		this._parentID = -1;
+// 	}
 
-	if (this._parentID !== (<any>parentTransform)._worldID) {
-		// concat the parent matrix with the objects transform.
-		const pt = parentTransform.worldTransform;
-		const wt = this.worldTransform;
+// 	if (this._parentID !== (<any>parentTransform)._worldID) {
+// 		// concat the parent matrix with the objects transform.
+// 		const pt = parentTransform.worldTransform;
+// 		const wt = this.worldTransform;
 
-		//===== here is the trick
-		wt.a = lt.a;
-		wt.b = lt.b;
-		wt.c = lt.c;
-		wt.d = lt.d;
-		//===== changes end
-		wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
-		wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
+// 		//===== here is the trick
+// 		wt.a = lt.a;
+// 		wt.b = lt.b;
+// 		wt.c = lt.c;
+// 		wt.d = lt.d;
+// 		//===== changes end
+// 		wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
+// 		wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
 
-		this._parentID = (<any>parentTransform)._worldID;
-		this._worldID++;
-	}
-}
+// 		this._parentID = (<any>parentTransform)._worldID;
+// 		this._worldID++;
+// 	}
+// }
 
-function hackTransform(element: PIXI.Container) {
-	element.transform.updateTransform = updateTransformOnlyTranslate;
-}
+// function hackTransform(element: PIXI.Container) {
+// 	element.transform.updateTransform = updateTransformOnlyTranslate;
+// }
 
 
-// radians = degrees * (Math.PI / 180);
-// degrees = radians * (180 / Math.PI);
-// Math.random()
-//
-// arrayName.push(item)
-// arrayName.length
+// // radians = degrees * (Math.PI / 180);
+// // degrees = radians * (180 / Math.PI);
+// // Math.random()
+// //
+// // arrayName.push(item)
+// // arrayName.length
 
 export var tweenFunctions = {
 	// t - current time, b - beginning value, _c - final value, d - total duration
