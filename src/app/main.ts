@@ -1,10 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { Howl, Howler } from 'howler';
 
-import { GameBoard, GameBoardMenu, OnResizeFlag } from "./parcheesi";
 import { bgColor } from "./constants";
-
-//const bgColor = Color.rgb('rgb(0,0,0)').rgbNumber()
+import { GameBoard, GameBoardMenu, OnResizeFlag } from "./parcheesi";
+import { initSounds, Sounds } from "./sounds";
 
 export enum ResolutionChangeBehavior {
 	KeepBuiltIn = 0,
@@ -15,46 +13,6 @@ export enum ResolutionChangeBehavior {
 export const KeepBuiltInResolutionValue = 3;
 export const ResolutionChangeMode = ResolutionChangeBehavior.Deal;
 
-let canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-
-let type = "WebGL";
-if (!PIXI.utils.isWebGLSupported()) {
-	type = "canvas";
-}
-PIXI.utils.sayHello(type);
-
-//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
-//PIXI.settings.PRECISION_FRAGMENT = PRECISION.HIGH
-//PIXI.settings.FILTER_RESOLUTION = 2
-
-// This will let images scale better
-PIXI.settings.ANISOTROPIC_LEVEL = 16;
-PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON;
-
-const renderer = new PIXI.Renderer({
-	view: canvas,
-	width: window.innerWidth,
-	height: window.innerHeight,
-	antialias: true,
-	transparent: false,
-	resolution: (window.devicePixelRatio || 1),
-	backgroundColor: bgColor,
-});
-
-// TODO: What does it really do, should it be only used in some resolution change behaviors?
-//renderer.autoDensity = true
-// view is apparently an HTML Canvas element
-// renderer.view.style.position = "absolute";
-// renderer.view.style.display = "block";
-
-if (ResolutionChangeMode as ResolutionChangeBehavior === ResolutionChangeBehavior.KeepBuiltIn) {
-	renderer.resolution = KeepBuiltInResolutionValue;
-	renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
-}
-
-const stage = new PIXI.Container();
-
-let loader = new PIXI.Loader(); // of PIXI.Loader.shared
 
 export const IMAGE_ALIASES: Record<string, string> = {
 	"dice": "/images/ParcheesiDice.png",
@@ -80,103 +38,72 @@ export const WH_IMAGE_RATIO: Record<string, number> = {
 	'settings-restart': 195.6 / 37.1,
 };
 
-for (const im in IMAGE_ALIASES) {
-	await PIXI.Assets.load(IMAGE_ALIASES[im]);
-}
+export const loadParcheesiGame = async (app: PIXI.Application) => {
 
-// ------------ sounds ----------------------------------------
-export let sounds: Record<string, Howl> = {};
-const GLOBAL_VOLUME = 0.5;
-export let CURRENT_VOLUME = 0;
+	// TODO(next): We don't need the loader anymore?
+	// let loader = new PIXI.Loader(); // of PIXI.Loader.shared
 
-Howler.autoUnlock = false;
-// Initially we always mute
-Howler.volume(0);
+	for (const im in IMAGE_ALIASES) {
+		await PIXI.Assets.load(IMAGE_ALIASES[im]);
+	}
 
-export function unmuteIfVolumeUp() {
-	Howler.volume(CURRENT_VOLUME);
-}
-
-export function toggleMuteUnmute() {
-	CURRENT_VOLUME = CURRENT_VOLUME == 0 ? GLOBAL_VOLUME : 0;
-	unmuteIfVolumeUp();
-}
-
-export function isMuted() {
-	return CURRENT_VOLUME == 0;
-}
-
-export const DICE_SOUND_COUNT = 29;
-for (let i = 0; i < DICE_SOUND_COUNT; i++) {
-	loadSound(`dice-${i}`, [`/sounds/dice/dice-${i}.webm`, `/sounds/dice/dice-${i}.mp3`], 0.3);
-}
-
-export const PIECE_SOUND_COUNT = 8;
-for (let i = 0; i < PIECE_SOUND_COUNT; i++) {
-	loadSound(`piece-${i}`, [`/sounds/piece/piece-${i}.webm`, `/sounds/piece/piece-${i}.mp3`], 0.5);
-}
-loadSound('wrong', ['/sounds/wrong.webm', '/sounds/wrong.mp3'], 0.5);
-loadSound('tada', ['/sounds/tada.webm', '/sounds/tada.mp3'], 0.8);
-loadSound('bonus', ['/sounds/bonus.webm', '/sounds/bonus.mp3'], 0.5);
-loadSound('sweep', ['/sounds/sweep.webm', '/sounds/sweep.mp3'], 0.3);
-loadSound('click', ['/sounds/click.webm', '/sounds/click.mp3'], 0.3);
-loadSound('select', ['/sounds/select.webm', '/sounds/select.mp3'], 0.3);
-
-function loadSound(name: string, url: string | string[], volume: number) {
-	//loader.add('tada', '/sounds/tada.mp3')
-	let s = new Howl({
-		autoplay: false,
-		src: url,
-		preload: true,
-		loop: false,
-		volume: volume,
-		onplayerror: function () {
-			if (Howler.volume() > 0) {
-				if (Howler.ctx.state == "suspended") {
-					Howler.ctx.resume().then(
-						() => {
-							s.play();
-						}
-					).catch(() => {
-					});
-				}
-				s.once('unlock', function () {
-					s.play();
-				});
-			}
-		},
-	});
-	sounds[name] = s;
-}
-
-export function playSound(name: string, randomRate: boolean = false) {
-	//sound.play('wrong', {loop: false, volume: WRONG_VOLUME})
-	sounds[name].rate(randomRate ? 1 + (Math.random() * 0.3 - 0.15) : 1);
-	sounds[name].play();
-}
+	const sounds = initSounds();
+	const stage = new PIXI.Container();
+	beginGame(app, stage, sounds);
 
 
-// called upon each error
-loader.onError.add((errMessage: string, loader: any, resource: any) => {
-	console.log("[Loader] " + errMessage + ": " + resource.url);
-});
-// called once per loaded/errored file
-loader.onProgress.add((loader: any, resource: any) => {
-	//console.log("[Loader] " + loader.progress + "%")
-});
-// called once per loaded file
-loader.onLoad.add((loader: any, resource: any) => {
-	//console.log(`[Loader] ${resource.name} [${resource.url}]`) // Using special "`" delimiter
-}
-);
+
+};
+
+// TODO(next): Improve rendering
+// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
+// PIXI.settings.PRECISION_FRAGMENT = PRECISION.HIGH
+// PIXI.settings.FILTER_RESOLUTION = 2
+// PIXI.settings.ANISOTROPIC_LEVEL = 16;
+// PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON;
+
+// TODO(next):
+// const renderer = new PIXI.Renderer({
+// 	view: canvas,
+// 	width: window.innerWidth,
+// 	height: window.innerHeight,
+// 	antialias: true,
+// 	transparent: false,
+// 	resolution: (window.devicePixelRatio || 1),
+// 	backgroundColor: bgColor,
+// });
+
+// TODO: What does it really do, should it be only used in some resolution change behaviors?
+//renderer.autoDensity = true
+// view is apparently an HTML Canvas element
+// renderer.view.style.position = "absolute";
+// renderer.view.style.display = "block";
+
+// TODO(next):
+// if (ResolutionChangeMode as ResolutionChangeBehavior === ResolutionChangeBehavior.KeepBuiltIn) {
+// 	renderer.resolution = KeepBuiltInResolutionValue;
+// 	renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
+// }
+
+
+
+// TODO(next): No need for listeners?
+// // called upon each error
+// loader.onError.add((errMessage: string, loader: any, resource: any) => {
+// 	console.log("[Loader] " + errMessage + ": " + resource.url);
+// });
+// // called once per loaded/errored file
+// loader.onProgress.add((loader: any, resource: any) => {
+// 	//console.log("[Loader] " + loader.progress + "%")
+// });
+// // called once per loaded file
+// loader.onLoad.add((loader: any, resource: any) => {
+// 	//console.log(`[Loader] ${resource.name} [${resource.url}]`) // Using special "`" delimiter
+// });
 
 //renderer.plugins.interaction.autoPreventDefault = false
 
-loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all resources have loaded
-	// White 16x16 texture
-	// stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-
-	//let ship = new ShipGraphics(renderer, stage);
+const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds) => {
 	let ticker = new PIXI.Ticker();
 
 	let accumulatedPlayersByColor = new Array<boolean>();
@@ -202,15 +129,15 @@ loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all re
 		return result;
 	};
 
-	let menu = new GameBoardMenu(renderer, loader, accumulatedPlayersByColor,
+	let menu = new GameBoardMenu(app.renderer, /*loader, */accumulatedPlayersByColor,
 		(playersByColor: Array<boolean>) => {
 			//setPiecesPerColor(amountOfPlayers(playersByColor) <= 2 ? 5 : 4)
 			accumulatedPlayersByColor = playersByColor;
 			menu.visible = false;
 			let prevGame = game;
-			let newGame = new GameBoard(renderer, loader, accumulatedPlayersByColor, gameFinishedRestartClick, (playersByColor: Array<boolean>) => {
+			let newGame = new GameBoard(app.renderer, /*loader, */accumulatedPlayersByColor, gameFinishedRestartClick, (playersByColor: Array<boolean>) => {
 				gameFinishedRestartClick(playersByColor);
-			});
+			}, sounds);
 			stage.addChild(newGame);
 			if (prevGame != null) {
 				stage.removeChild(prevGame);
@@ -220,7 +147,7 @@ loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all re
 		},
 		(playersByColor: Array<boolean>) => {
 			gameFinishedRestartClick(playersByColor);
-		});
+		}, sounds);
 	menu.visible = true;
 
 	let game: GameBoard;
@@ -228,14 +155,14 @@ loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all re
 
 	stage.sortChildren(); // For zIndex to take effect
 
-	ticker.add((delta) => {
+	ticker.add((ticker) => {
 		if (menu != null && menu.visible) {
-			menu.update(delta);
-			renderer.render(menu);
+			menu.update(ticker.deltaTime);
+			app.renderer.render(menu);
 		}
 		if (game != null && game.visible) {
-			game.update(delta);
-			renderer.render(game);
+			game.update(ticker.deltaTime);
+			app.renderer.render(game);
 		}
 	}, PIXI.UPDATE_PRIORITY.LOW);
 	ticker.start();
@@ -263,14 +190,16 @@ loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all re
 		savedOrientation = newOrientation;
 		if (changed) {
 			if (ResolutionChangeMode == ResolutionChangeBehavior.Deal) {
-				renderer.resolution = window.devicePixelRatio;
-				renderer.plugins.interaction.resolution = window.devicePixelRatio;
+				app.renderer.resolution = window.devicePixelRatio;
+				// TODO(next): fix next line
+				// app.renderer.plugins.interaction.resolution = window.devicePixelRatio;
 			} else if (ResolutionChangeMode == ResolutionChangeBehavior.KeepBuiltIn) {
-				renderer.resolution = KeepBuiltInResolutionValue;
-				renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
+				app.renderer.resolution = KeepBuiltInResolutionValue;
+				// TODO(next): fix next line
+				// app.renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
 			} else if (ResolutionChangeMode == ResolutionChangeBehavior.Skip) {
 			}
-			renderer.resize(newWidth, newHeight);
+			app.renderer.resize(newWidth, newHeight);
 			// Renderer's size depends on renderer.resolution automatically
 			if (menu != null) {
 				menu.onResize(OnResizeFlag.ALL);
@@ -315,8 +244,5 @@ loader.onComplete.add((loader: PIXI.Loader, resources: any) => {  // once all re
 	// }
 
 	//console.log(PIXI.utils.TextureCache)
-	renderer.render(stage);
-
-});
-
-// loader.load() // TODO(next): Do we need to wait or the loader takes care of that?
+	app.renderer.render(stage);
+};

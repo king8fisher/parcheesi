@@ -19,19 +19,14 @@ import {
 } from "./constants";
 
 import {
-	DICE_SOUND_COUNT,
 	IMAGE_ALIASES,
-	isMuted,
-	PIECE_SOUND_COUNT,
-	playSound,
 	ResolutionChangeBehavior,
 	ResolutionChangeMode,
-	toggleMuteUnmute,
-	unmuteIfVolumeUp,
 	WH_IMAGE_RATIO
 } from "./main";
 
 import { tweenFunctions } from "./util";
+import { Sounds } from "./sounds";
 
 export enum OnResizeFlag {
 	SIZE = 0x01,
@@ -187,8 +182,15 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 // ButtonBehaviorContainer: If you implement "hoverChanged()",
 // call it from your constructor, the base class can't do that for you.
 export abstract class ButtonBehaviorContainer extends PIXI.Container {
-	constructor() {
+	private _sounds: Sounds;
+
+	get sounds() {
+		return this._sounds;
+	}
+
+	constructor(sounds: Sounds) {
 		super();
+		this._sounds = sounds;
 		this.interactive = true;
 		this.cursor = 'pointer';
 		this.on('tap', this.onTap.bind(this))
@@ -218,7 +220,7 @@ export abstract class ButtonBehaviorContainer extends PIXI.Container {
 	}
 
 	onTap() {
-		unmuteIfVolumeUp();
+		this._sounds.unmuteIfVolumeUp();
 
 		if (this.isAllowedToClick()) {
 			this.clickHappened();
@@ -230,7 +232,7 @@ export abstract class ButtonBehaviorContainer extends PIXI.Container {
 	}
 
 	onButtonDown() {
-		unmuteIfVolumeUp();
+		this._sounds.unmuteIfVolumeUp();
 		if (this.isAllowedToClick()) {
 			ButtonBehaviorContainer.mouseDownOn = this;
 		}
@@ -271,7 +273,7 @@ class PieceButtonBehavior extends ButtonBehaviorContainer {
 	owner: Piece;
 
 	constructor(owner: Piece) {
-		super();
+		super(owner.board.sounds);
 		this.owner = owner;
 		this.hoverChanged();
 	}
@@ -283,7 +285,7 @@ class PieceButtonBehavior extends ButtonBehaviorContainer {
 		} else {
 			this.owner.board.pieceSelected = this.owner;
 		}
-		playSound("select", true);
+		this.owner.board.sounds.playSound("select", true);
 	}
 
 	isAllowedToClick(): boolean {
@@ -297,7 +299,13 @@ class PieceButtonBehavior extends ButtonBehaviorContainer {
 }
 
 export class Piece extends PIXI.Container implements OnResize {
-	board: GameBoard;
+
+	private _board: GameBoard;
+	get board() {
+		return this._board;
+	}
+
+
 	overlay: PIXI.Graphics;
 	colorIndex: number;
 	// pathIndex is counted from the standpoint of each color, being
@@ -311,7 +319,7 @@ export class Piece extends PIXI.Container implements OnResize {
 	// internalGroupIndex represents each color's piece index, [0..4)
 	constructor(board: GameBoard, colorIndex: number, internalColorGroupIndex: number) {
 		super();
-		this.board = board;
+		this._board = board;
 		this.colorIndex = colorIndex;
 		this.internalColorGroupIndex = internalColorGroupIndex;
 
@@ -351,7 +359,7 @@ export class Piece extends PIXI.Container implements OnResize {
 
 	// TODO: Move out stuff that doesn't need to always update
 	update(delta: number) {
-		if (!this.board.isPlayerPlaying(this.colorIndex)) {
+		if (!this._board.isPlayerPlaying(this.colorIndex)) {
 			this.visible = false;
 			return;
 		}
@@ -359,7 +367,7 @@ export class Piece extends PIXI.Container implements OnResize {
 			// Position on the path has changed. We will initiate tween.
 			this.prevPositionX = this.position.x;
 			this.prevPositionY = this.position.y;
-			this.tweenTimeStart = this.board.timePassed;
+			this.tweenTimeStart = this._board.timePassed;
 			this.tweenTimeEnd = this.tweenTimeStart + 400;
 			this.prevPathIndex = this.pathIndex;
 		}
@@ -381,11 +389,11 @@ export class Piece extends PIXI.Container implements OnResize {
 			desiredDestinationPosition = GameBoard.cellsByBlocksGlobalPositions[index];
 		}
 
-		if (this.tweenTimeStart < 0 || this.board.timePassed >= this.tweenTimeEnd) {
+		if (this.tweenTimeStart < 0 || this._board.timePassed >= this.tweenTimeEnd) {
 			this.position.copyFrom(desiredDestinationPosition);
 		} else {
-			let x = tweenFunctions.easeOutExpo(this.board.timePassed - this.tweenTimeStart, this.prevPositionX, desiredDestinationPosition.x, this.tweenTimeEnd - this.tweenTimeStart);
-			let y = tweenFunctions.easeOutExpo(this.board.timePassed - this.tweenTimeStart, this.prevPositionY, desiredDestinationPosition.y, this.tweenTimeEnd - this.tweenTimeStart);
+			let x = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionX, desiredDestinationPosition.x, this.tweenTimeEnd - this.tweenTimeStart);
+			let y = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionY, desiredDestinationPosition.y, this.tweenTimeEnd - this.tweenTimeStart);
 			this.position.x = x;
 			this.position.y = y;
 		}
@@ -397,7 +405,7 @@ export class Piece extends PIXI.Container implements OnResize {
 			)).lighten(0.2).rgbNumber());
 		} else {
 			this.overlay.beginFill(playerColors[this.colorIndex]);
-			if (this == this.board.pieceSelected) {
+			if (this == this._board.pieceSelected) {
 				this.overlay.alpha = 1;
 				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceSelectedBorderColor, 1);
 			} else {
@@ -416,7 +424,7 @@ class DiceButtonBehavior extends ButtonBehaviorContainer {
 	owner: Dice;
 
 	constructor(owner: Dice) {
-		super();
+		super(owner.board.sounds);
 		this.owner = owner;
 		this.hoverChanged();
 	}
@@ -437,7 +445,12 @@ class DiceButtonBehavior extends ButtonBehaviorContainer {
 
 
 export class Dice extends PIXI.Container implements OnResize {
-	board: GameBoard;
+	private _board: GameBoard;
+
+	get board() {
+		return this._board;
+	}
+
 	overlay: PIXI.Graphics;
 	sprite: PIXI.Sprite;
 	internalDiceIndex: number;
@@ -480,7 +493,7 @@ export class Dice extends PIXI.Container implements OnResize {
 	// internalGroupIndex represents each color's piece index, [0..4)
 	constructor(board: GameBoard, internalDiceIndex: number) {
 		super();
-		this.board = board;
+		this._board = board;
 		this.internalDiceIndex = internalDiceIndex;
 
 		this.overlay = new PIXI.Graphics();
@@ -513,7 +526,7 @@ export class Dice extends PIXI.Container implements OnResize {
 		this._bonusNumber = 0;
 		this._used = false;
 		if (this.internalDiceIndex == 0) {
-			playSound(`dice-${Math.floor(Math.random() * DICE_SOUND_COUNT)}`);
+			this.board.sounds.playSound(`dice-${Math.floor(Math.random() * this.board.sounds.DICE_SOUND_COUNT)}`);
 		}
 	}
 
@@ -560,15 +573,15 @@ export class Dice extends PIXI.Container implements OnResize {
 class SkipButtonBehavior extends ButtonBehaviorContainer {
 	owner: Skip;
 
-	constructor(owner: Skip) {
-		super();
+	constructor(owner: Skip, sounds: Sounds) {
+		super(owner.board.sounds);
 		this.owner = owner;
 		this.hoverChanged();
 	}
 
 	clickHappened(): void {
 		if (this.owner.board.useSkipIfAllowed()) {
-			playSound("sweep", true);
+			this.sounds.playSound("sweep", true);
 		}
 	}
 
@@ -597,7 +610,7 @@ export class Skip extends PIXI.Container implements OnResize {
 
 		this.addChild(this.overlay);
 
-		this.button = new SkipButtonBehavior(this);
+		this.button = new SkipButtonBehavior(this, board.sounds);
 		this.button.hitArea = new PIXI.Rectangle(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT);
 		this.addChild(this.button);
 
@@ -747,14 +760,24 @@ export class GameBoardBase extends PIXI.Graphics implements OnResize {
 	restartGameCallback: (arg0: Array<boolean>) => void;
 
 	public renderer: PIXI.Renderer;
-	public loader: PIXI.Loader;
+	// public loader: PIXI.Loader;
 
 	blocks: Array<BlockContainer> = new Array<BlockContainer>();
 
-	constructor(renderer: PIXI.Renderer, loader: PIXI.Loader, restartGameCallback: (arg0: Array<boolean>) => void) {
+	private _sounds: Sounds;
+
+	get sounds() {
+		return this._sounds;
+	}
+
+	constructor(renderer: PIXI.Renderer,
+		// loader: PIXI.Loader,
+		restartGameCallback: (arg0: Array<boolean>) => void, sounds: Sounds) {
 		super();
 		this.renderer = renderer;
-		this.loader = loader;
+		// this.loader = loader;
+		this._sounds = sounds;
+
 		this.restartGameCallback = restartGameCallback;
 		D.recalculateCellSizes(this.renderer);
 
@@ -913,10 +936,12 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	beginGameCallback: (arg0: Array<boolean>) => void;
 
-	constructor(renderer: PIXI.Renderer, loader: PIXI.Loader, playersByColor: Array<boolean>,
+	constructor(renderer: PIXI.Renderer,
+		playersByColor: Array<boolean>,
 		beginGameCallback: (playersByColor: Array<boolean>) => void,
-		restartGameCallback: (playersByColor: Array<boolean>) => void) {
-		super(renderer, loader, restartGameCallback);
+		restartGameCallback: (playersByColor: Array<boolean>) => void,
+		sounds: Sounds) {
+		super(renderer, /*loader, */restartGameCallback, sounds);
 		this.beginGameCallback = beginGameCallback;
 
 		this.playersByColor = playersByColor;
@@ -968,7 +993,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			board: GameBoard;
 
 			constructor(board: GameBoard) {
-				super();
+				super(board.sounds);
 				this.board = board;
 				this.hoverChanged();
 			}
@@ -976,7 +1001,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			clickHappened(): void {
 				// Game begins: We call the function passed to us
 				this.board.beginGameCallback(this.board.playersByColor);
-				playSound("click", true);
+				this.board.sounds.playSound("click", true);
 			}
 
 			isAllowedToClick(): boolean {
@@ -1140,12 +1165,12 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		let moveResult = this._useDiceAtSelectedPieceIfAllowed(this.pieceSelected, dice, true);
 		if (moveResult.success) {
 			if (moveResult.bonus > 0) {
-				playSound('bonus');
+				this.sounds.playSound('bonus');
 			} else {
-				playSound(`piece-${Math.floor(Math.random() * PIECE_SOUND_COUNT)}`);
+				this.sounds.playSound(`piece-${Math.floor(Math.random() * this.sounds.PIECE_SOUND_COUNT)}`);
 			}
 		} else {
-			playSound('wrong');
+			this.sounds.playSound('wrong');
 		}
 
 		this.deselectPieceIfNecessary();
@@ -1287,7 +1312,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 						// After game buttons
 						// TODO: Move this GUI stuff out of here
 						this.startGameButton.visible = true;
-						playSound('tada');
+						this.sounds.playSound('tada');
 						// this.cog.setMenuVisible(true)
 						return;
 					}
@@ -1491,9 +1516,12 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 	startGameButtonText: PIXI.Sprite;
 	cog: Cog;
 
-	constructor(renderer: PIXI.Renderer, loader: PIXI.Loader, playersByColor: Array<boolean>, beginGameCallback: (arg0: Array<boolean>) => void,
-		restartGameCallback: (playersByColor: Array<boolean>) => void) {
-		super(renderer, loader, restartGameCallback);
+	constructor(renderer: PIXI.Renderer,
+		playersByColor: Array<boolean>,
+		beginGameCallback: (arg0: Array<boolean>) => void,
+		restartGameCallback: (playersByColor: Array<boolean>) => void,
+		sounds: Sounds) {
+		super(renderer, restartGameCallback, sounds);
 
 		this.playersByColor = playersByColor;
 
@@ -1507,14 +1535,14 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 				board: GameBoardMenu;
 
 				constructor(board: GameBoardMenu) {
-					super();
+					super(board.sounds);
 					this.board = board;
 					this.hoverChanged();
 				}
 
 				clickHappened(): void {
 					this.board.playersByColor[i] = !this.board.playersByColor[i];
-					playSound("click", true);
+					this.sounds.playSound("click", true);
 					this.board.onResize(OnResizeFlag.DRAW);
 				}
 
@@ -1537,14 +1565,14 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			board: GameBoardMenu;
 
 			constructor(board: GameBoardMenu) {
-				super();
+				super(board.sounds);
 				this.board = board;
 				this.hoverChanged();
 			}
 
 			clickHappened(): void {
 				this.board.onResize(OnResizeFlag.DRAW);
-				playSound("click", true);
+				this.board.sounds.playSound("click", true);
 				// Game begins: We call the function passed to us
 				this.board.beginGameCallback(this.board.playersByColor);
 			}
@@ -1674,7 +1702,6 @@ export class Cog extends PIXI.Container implements OnResize {
 	muteSprite: PIXI.Sprite;
 
 	renderer: PIXI.Renderer;
-	loader: PIXI.Loader;
 	gameBoardBase: GameBoardBase;
 
 	menu: Menu;
@@ -1682,7 +1709,6 @@ export class Cog extends PIXI.Container implements OnResize {
 	constructor(gameBoardBase: GameBoardBase) {
 		super();
 		this.renderer = gameBoardBase.renderer;
-		this.loader = gameBoardBase.loader;
 		this.gameBoardBase = gameBoardBase;
 
 		this.cogSprite = PIXI.Sprite.from(IMAGE_ALIASES["cog"]);
@@ -1695,14 +1721,14 @@ export class Cog extends PIXI.Container implements OnResize {
 			owner: Cog;
 
 			constructor(owner: Cog) {
-				super();
+				super(gameBoardBase.sounds);
 				this.owner = owner;
 				this.hoverChanged();
 			}
 
 			clickHappened(): void {
 				this.owner.toggleMenuVisibility();
-				playSound("click", true);
+				gameBoardBase.sounds.playSound("click", true);
 			}
 
 			isAllowedToClick(): boolean {
@@ -1714,7 +1740,7 @@ export class Cog extends PIXI.Container implements OnResize {
 			}
 		}(this));
 
-		this.menu = new Menu(this);
+		this.menu = new Menu(this, gameBoardBase.sounds);
 		this.menu.visible = false;
 		this.addChild(this.menu);
 
@@ -1726,14 +1752,14 @@ export class Cog extends PIXI.Container implements OnResize {
 			owner: Cog;
 
 			constructor(owner: Cog) {
-				super();
+				super(gameBoardBase.sounds);
 				this.owner = owner;
 				this.hoverChanged();
 			}
 
 			clickHappened(): void {
-				toggleMuteUnmute();
-				playSound("click", true);
+				gameBoardBase.sounds.toggleMuteUnmute();
+				gameBoardBase.sounds.playSound("click", true);
 				this.owner.onResize(OnResizeFlag.ALL);
 			}
 
@@ -1789,7 +1815,7 @@ export class Cog extends PIXI.Container implements OnResize {
 			(this.cogSprite.width / 2) / this.cogSprite.scale.x,
 			(this.cogSprite.height / 2) / this.cogSprite.scale.y);
 
-		this.muteSprite.texture = isMuted() ? PIXI.Texture.from(IMAGE_ALIASES["sound-off"]) : PIXI.Texture.from(IMAGE_ALIASES["sound-on"]);
+		this.muteSprite.texture = this.gameBoardBase.sounds.isMuted() ? PIXI.Texture.from(IMAGE_ALIASES["sound-off"]) : PIXI.Texture.from(IMAGE_ALIASES["sound-on"]);
 		this.muteSprite.width = width;
 		this.muteSprite.height = width;
 		this.muteSprite.position.set(this.cogSprite.width / 2 + cogGap, cogGap + this.cogSprite.height / 2);
@@ -1815,13 +1841,20 @@ export class Menu extends PIXI.Container implements OnResize {
 
 	restartButton: RestartButton;
 
-	constructor(cog: Cog) {
+	private _sounds: Sounds;
+
+	get sounds() {
+		return this._sounds;
+	}
+
+	constructor(cog: Cog, sounds: Sounds) {
 		super();
+		this._sounds = sounds;
 		this.cog = cog;
 
 		this.graphics = new PIXI.Graphics();
 		this.addChild(this.graphics);
-		this.restartButton = new RestartButton(this);
+		this.restartButton = new RestartButton(this, sounds);
 		this.addChild(this.restartButton);
 		this.onResize(OnResizeFlag.ALL);
 	}
@@ -1853,8 +1886,14 @@ export class RestartButton extends PIXI.Container implements OnResize {
 	graphics: PIXI.Graphics;
 	sprite: PIXI.Sprite;
 
-	constructor(menu: Menu) {
+	private _sounds: Sounds;
+	get sounds() {
+		return this._sounds;
+	}
+
+	constructor(menu: Menu, sounds: Sounds) {
 		super();
+		this._sounds = sounds;
 		this.menu = menu;
 		this.graphics = new PIXI.Graphics();
 		this.addChild(this.graphics);
@@ -1866,14 +1905,14 @@ export class RestartButton extends PIXI.Container implements OnResize {
 			owner: RestartButton;
 
 			constructor(owner: RestartButton) {
-				super();
+				super(owner.sounds);
 				this.owner = owner;
 			}
 
 			clickHappened(): void {
 				this.owner.menu.cog.setMenuVisible(false);
 				this.owner.menu.cog.gameBoardBase.restartGameCallback(new Array<boolean>());
-				playSound("click", true);
+				this.sounds.playSound("click", true);
 			}
 
 			hoverChanged(): void {
