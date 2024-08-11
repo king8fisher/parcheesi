@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<meta name="mobile-web-app-capable" content="yes">
+
+	<link rel="manifest" href="/manifest.json">
+	<meta name="msapplication-starturl" content="/">
+	<meta name="msapplication-TileColor" content="#1E1E1E">
+	<meta name="theme-color" content="#1E1E1E"/>
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Parcheesi">
+
+	<link rel="shortcut icon" href="/images/icons/favicon.ico?v={{ .bundleVersion }}">
+    {{ range $index, $element := .icons }}
+			<link rel="icon" type="image/png" href="/images/icons/{{- $element -}}.png?v={{ $.bundleVersion }}"
+			      sizes="{{- $element -}}">
+    {{- end -}}
+    {{ range $index, $element := .icons }}
+			<link rel="apple-touch-icon" sizes="{{- $element -}}"
+			      href="/images/icons/{{- $element -}}.png?v={{ $.bundleVersion }}">
+    {{- end }}
+
+	<meta name="application-name" content="Parcheesi">
+	<title>Parcheesi With Friends</title>
+
+</head>
+<style>
+	html, body {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		background-color: rgb(25, 25, 25);
+	}
+
+	.container {
+		display: flex;
+		justify-content: center;
+		height: 100%;
+	}
+
+	canvas {
+		height: 100%;
+	}
+</style>
+
+<body>
+
+<script>
+	if ('serviceWorker' in navigator) {
+		window.addEventListener('load', () => {
+			window.addEventListener("beforeinstallprompt", function (event) {
+				// Avoid showing the auto "Add to Home Screen" prompt.
+				event.preventDefault()
+				return false
+			})
+
+			navigator.serviceWorker.addEventListener('controllerchange', function (event) {
+				// navigator.serviceWorker.controller has changed, for instance because it called "self.skipWaiting()"
+				console.log('# controllerchange', event)
+				window.location.reload()
+			})
+			navigator.serviceWorker.register('/sw.js', {  // '/sw-bundle.js?v={{ .swVersion }}'
+				scope: '/' // it is by default the same as where the sw.js file resides
+			}).then(function (swRegistration) { // because registration returns a promise...
+
+				// navigator.serviceWorker.controller refers to the service worker that controls this page.
+				if (!navigator.serviceWorker.controller) {
+					// the page didn't load using a service worker, the content has been directly loaded from the network.
+					// that can actually be when service worker is in the process of being installed for the first time.
+					console.log("not in service worker!")
+				}
+
+				// am I myself initially in "installing" state???
+				let installingSW = swRegistration.installing
+				if (installingSW) {
+					if (installingSW.state == 'installed') {
+						// Already installed
+						// OFFER TO UPDATE
+					}
+					// We need to track what is happening to this "installing" service worker
+					// and see if it gets installed.
+					installingSW.addEventListener('statechange', function () {
+						if (installingSW.state == 'installed') {
+							// The other sw is ready to work, but not yet active.
+							// OFFER TO UPDATE
+						}
+					})
+				}
+
+				let waitingSW = swRegistration.waiting
+				if (waitingSW) {
+					// SHOW "UPDATE AVAILABLE" DIALOG
+					console.log("waitingSW", waitingSW)
+				}
+
+				// If I'm another version of service worker than the one active,
+				// then this will return currently active service worker. This can
+				// be also this exact one.
+				let activeSW = swRegistration.active
+				if (activeSW) {
+					console.log("activeSW", activeSW)
+				}
+
+				// reg.unregister(); // tell to unregister the worker
+				// reg.update(); // trigger an update to the worker
+
+				// Three properties to read the lifecycle of the service worker, they show
+				// at the DevTool panel, by reading these properties.
+				// reg.installing; // either point to the serviceWorker object or null - some other is installing (but might fail)
+				// reg.waiting;    // either point to the serviceWorker object or null - some other sw waiting to take over
+				// reg.active;     // either point to the serviceWorker object or null
+
+				// "updatefound" it is fired any time the ServiceWorkerRegistration.installing property acquires a new service worker,
+				// so basically when reg.installing has changed. All the updates are in some waiting worker which is right now
+				// installing and it will not take over until old version doesn't get 0 clients.
+				swRegistration.onupdatefound = function () {
+					console.log("swRegistration.onupdatefound!", swRegistration.installing)
+					let installingSW = swRegistration.installing; // there's an update in progress of another sw worker
+					if (installingSW != null) {
+						installingSW.state // read obtained sw object's state
+						// sw.state:
+						// "installing" - install event has fired but hasn't yet completed.
+						// "installed" - installation event completed but hasn't yet activated.
+						// "activating" - activate event has fired but hasn't yet completed.
+						// "activated" - activate event completed but hasn't yet activated - ready to receive "fetch" events.
+						// "redundant" - service worker has been thrown away - when fails to install, or got superseded by another service worker.
+						if (installingSW.state == 'installing') {
+							console.log("I'm installing!")
+						}
+						installingSW.addEventListener('statechange', function () {
+							// Fires whenever the value of sw.state changes.
+							if (installingSW.state == 'installed') {
+								// the update is finally installed and ready to become active.
+								installingSW.postMessage({'skipWaiting': true})
+							} else if (installingSW.state == 'activated') {
+								//window.location.reload()
+								console.log("statechange", installingSW)
+							}
+						})
+					}
+				}
+			}).catch(function (err) {
+				console.log('SW registration failed:', err)
+			})
+		});
+	}
+</script>
+<canvas id="gameCanvas" class="container"></canvas>
+{{/* All this will bypass service worker if it was just installed */}}
+<script type="text/javascript" src="/bundle.js?v={{ .bundleVersion }}"></script>
+</body>
+
+</html>

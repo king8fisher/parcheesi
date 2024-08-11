@@ -1,1 +1,0 @@
-live-server ./build <nul
