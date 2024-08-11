@@ -1,6 +1,6 @@
-Parcheesi indie game for a family and friends to play on one device.
+Parcheesi indie game for family and friends to play together on a single device.
 
-Elements of the game are facing each edge of the device.
+The game elements are oriented towards each edge of the device.
 
 #### Feel free to contribute:
 
