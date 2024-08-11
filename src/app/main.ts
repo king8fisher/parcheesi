@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 import { bgColor } from "./constants";
 import { GameBoard, GameBoardMenu, OnResizeFlag } from "./parcheesi";
 import { initSounds, Sounds } from "./sounds";
+import { settings } from "@pixi/core";
 
 export enum ResolutionChangeBehavior {
 	KeepBuiltIn = 0,
@@ -51,8 +52,6 @@ export const loadParcheesiGame = async (app: PIXI.Application) => {
 	const stage = new PIXI.Container();
 	beginGame(app, stage, sounds);
 
-
-
 };
 
 // TODO(next): Improve rendering
@@ -84,22 +83,6 @@ export const loadParcheesiGame = async (app: PIXI.Application) => {
 // 	renderer.resolution = KeepBuiltInResolutionValue;
 // 	renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
 // }
-
-
-
-// TODO(next): No need for listeners?
-// // called upon each error
-// loader.onError.add((errMessage: string, loader: any, resource: any) => {
-// 	console.log("[Loader] " + errMessage + ": " + resource.url);
-// });
-// // called once per loaded/errored file
-// loader.onProgress.add((loader: any, resource: any) => {
-// 	//console.log("[Loader] " + loader.progress + "%")
-// });
-// // called once per loaded file
-// loader.onLoad.add((loader: any, resource: any) => {
-// 	//console.log(`[Loader] ${resource.name} [${resource.url}]`) // Using special "`" delimiter
-// });
 
 //renderer.plugins.interaction.autoPreventDefault = false
 
@@ -211,11 +194,11 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		}
 	};
 
-	onResize(null);
-	// window.addEventListener('resize', onResize, false)
-	// window.addEventListener("orientationchange", onResize, false);
+	//onResize(null);
+	window.addEventListener('resize', onResize, false);
+	//window.addEventListener("orientationchange", onResize, false);
 	window.setInterval(() => {
-		onResize(null);
+		//onResize(null);
 
 		if (Howler.ctx != null && Howler.ctx.state == "suspended") {
 			if (Howler.volume() > 0) {

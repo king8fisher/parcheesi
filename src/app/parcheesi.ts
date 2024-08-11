@@ -168,7 +168,7 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 		this.endFill();
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
 			//this.beginHole(); // TODO(next)
-			this.drawStar(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 9, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 8);
+			this.drawStar(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 4, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 10);
 			this.cut();
 			//this.endHole(); // TODO(next)
 		}
@@ -413,7 +413,7 @@ export class Piece extends PIXI.Container implements OnResize {
 				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceNonSelectedBorderColor, 1);
 			}
 		}
-		this.overlay.drawCircle(0, 0, D.CELL_HEIGHT * 0.35);
+		this.overlay.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
 		this.overlay.endFill();
 		this.visible = true;
 	}
@@ -490,9 +490,30 @@ export class Dice extends PIXI.Container implements OnResize {
 		this._used = v;
 	}
 
+	// private _sprites: PIXI.Sprite[] = [];
+	private _textures: PIXI.Texture[] = [];
+
+	private prepareSprites() {
+		[0, 1, 2, 3, 4, 5, 6, 7].forEach(frameIndex => {
+			const rect = new PIXI.Rectangle(
+				(frameIndex * diceImageCellSize) % (diceImageCellSize * diceImageCellsCount),
+				0,
+				diceImageCellSize,
+				diceImageCellSize);
+			const texture = new PIXI.Texture({
+				source: PIXI.Texture.from(IMAGE_ALIASES["dice"]).source,
+				frame: rect,
+			});
+			this._textures.push(texture);
+			// const sprite = new PIXI.Sprite(texture);
+			// this._sprites.push(sprite);
+		});
+	}
+
 	// internalGroupIndex represents each color's piece index, [0..4)
 	constructor(board: GameBoard, internalDiceIndex: number) {
 		super();
+
 		this._board = board;
 		this.internalDiceIndex = internalDiceIndex;
 
@@ -500,16 +521,17 @@ export class Dice extends PIXI.Container implements OnResize {
 
 		this.addChild(this.overlay);
 
-		this.sprite = PIXI.Sprite.from(IMAGE_ALIASES["dice"]); // TODO(next): Why did we clone? new PIXI.Sprite(board.loader.resources["dice"].texture.clone() /*to frame them separately*/); // .texture accesses the pixel data
-		this.sprite.texture.dynamic = true;
-		this.sprite.texture.frame.copyFrom(new PIXI.Rectangle(0, 0, diceImageCellSize, diceImageCellSize));
-		this.sprite.texture.updateUvs();
-		// TO prevent bleeding of pixelated textures, use PIXI.SCALE_MODES.NEAREST:
-		this.sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR; //  floating-point values for scaling
+		this.prepareSprites();
+
+		const sprite = new PIXI.Sprite(this._textures[0]);
 		// Rotate around the center
-		this.sprite.anchor.x = 0.5;
-		this.sprite.anchor.y = 0.5;
-		this.sprite.visible = false;
+		sprite.anchor.x = 0.5;
+		sprite.anchor.y = 0.5;
+		sprite.visible = true;
+		// sprite.texture.frame.copyFrom(rect);
+		// TO prevent bleeding of pixelated textures, use PIXI.SCALE_MODES.NEAREST:
+		sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR; //  floating-point values for scaling
+		this.sprite = sprite;
 
 		this.addChild(this.sprite);
 
@@ -556,8 +578,8 @@ export class Dice extends PIXI.Container implements OnResize {
 		} else if (currentDiceNumber == BONUS_FOR_KNOCKING_OPPONENT) {
 			frameIndex = 7;
 		}
-		this.sprite.texture.frame.copyFrom(new PIXI.Rectangle((frameIndex * diceImageCellSize) % (diceImageCellSize * diceImageCellsCount), 0, diceImageCellSize, diceImageCellSize));
-		this.sprite.texture.updateUvs();
+		// this.sprite = this._sprites[frameIndex];
+		this.sprite.texture = this._textures[frameIndex];
 
 		this.sprite.width = D.CELL_HEIGHT * 2;
 		this.sprite.height = D.CELL_HEIGHT * 2;
@@ -566,6 +588,9 @@ export class Dice extends PIXI.Container implements OnResize {
 
 		// Rotate dice toward the player
 		this.sprite.rotation = -colorIndex * Math.PI / 2;
+
+		//this.sprite.texture.updateUvs();
+		//this.sprite.texture.update();
 	}
 
 }
