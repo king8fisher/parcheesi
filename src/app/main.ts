@@ -198,7 +198,7 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 	window.addEventListener('resize', onResize, false);
 	//window.addEventListener("orientationchange", onResize, false);
 	window.setInterval(() => {
-		//onResize(null);
+		onResize(null);
 
 		if (Howler.ctx != null && Howler.ctx.state == "suspended") {
 			if (Howler.volume() > 0) {
@@ -222,9 +222,9 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 	// 	}
 	// }
 
-	// if (window.DeviceOrientationEvent) {
-	// 	window.addEventListener("deviceorientation", onResize, false);
-	// }
+	if (window.DeviceOrientationEvent) {
+		window.addEventListener("deviceorientation", (e) => { onResize(null); }, false);
+	}
 
 	//console.log(PIXI.utils.TextureCache)
 	app.renderer.render(stage);

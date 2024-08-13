@@ -193,8 +193,9 @@ export abstract class ButtonBehaviorContainer extends PIXI.Container {
 		this._sounds = sounds;
 		this.interactive = true;
 		this.cursor = 'pointer';
-		this.on('tap', this.onTap.bind(this))
-			// .on('click', this.onTap.bind(this))
+		this
+			//.on('tap', this.onTap.bind(this))
+			//.on('click', this.onTap.bind(this))
 			.on('pointerdown', this.onButtonDown.bind(this))
 			.on('pointerup', this.onButtonUp.bind(this))
 			.on('pointerupoutside', this.onButtonUp.bind(this))

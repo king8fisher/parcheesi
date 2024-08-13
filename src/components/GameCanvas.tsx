@@ -19,12 +19,14 @@ const GameCanvas = () => {
 
   useEffect(() => {
     once(() => {
+
       (async () => {
+        if (!ref.current) return;
         const app = new Application();
 
         await app.init({
           hello: true,
-          resizeTo: ref.current || window,
+          resizeTo: ref.current,
           antialias: true,
           resolution: window.devicePixelRatio,
           autoDensity: false,
