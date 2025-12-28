@@ -16,8 +16,6 @@ import {
 
 import {
 	IMAGE_ALIASES,
-	ResolutionChangeBehavior,
-	ResolutionChangeMode,
 	WH_IMAGE_RATIO
 } from "./main";
 
@@ -60,16 +58,9 @@ export class D {
 		D.CELL_RADIUS = D.CELL_HEIGHT / 10;
 	}
 
-	// Return the true size taking into account resolution of the screen
+	// Return the logical viewport size (with autoDensity: true, screen gives CSS dimensions)
 	public static getViewportSize(renderer: PIXI.Renderer): PIXI.Point {
-		if (ResolutionChangeMode == ResolutionChangeBehavior.Deal) {
-			return new PIXI.Point(renderer.width / renderer.resolution,
-				renderer.height / renderer.resolution);
-		} else {
-			return new PIXI.Point(renderer.screen.width,
-				renderer.screen.height);
-		}
-
+		return new PIXI.Point(renderer.screen.width, renderer.screen.height);
 	}
 
 }

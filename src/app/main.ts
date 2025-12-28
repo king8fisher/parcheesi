@@ -3,14 +3,7 @@ import * as PIXI from 'pixi.js';
 import { GameBoard, GameBoardMenu, OnResizeFlag } from "./parcheesi";
 import { initSounds, Sounds } from "./sounds";
 
-export enum ResolutionChangeBehavior {
-	KeepBuiltIn = 0,
-	Deal = 1,
-	Skip = 2,
-}
-
-export const KeepBuiltInResolutionValue = 3;
-export const ResolutionChangeMode = ResolutionChangeBehavior.Skip;  // Using autoDensity: true in GameCanvas instead
+// Resolution is now handled by autoDensity: true in GameCanvas.tsx
 
 
 export const IMAGE_ALIASES: Record<string, string> = {
@@ -170,16 +163,7 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		savedHeight = newHeight;
 		savedOrientation = newOrientation;
 		if (changed) {
-			if (ResolutionChangeMode == ResolutionChangeBehavior.Deal) {
-				app.renderer.resolution = window.devicePixelRatio;
-				// TODO(next): fix next line
-				// app.renderer.plugins.interaction.resolution = window.devicePixelRatio;
-			} else if (ResolutionChangeMode == ResolutionChangeBehavior.KeepBuiltIn) {
-				app.renderer.resolution = KeepBuiltInResolutionValue;
-				// TODO(next): fix next line
-				// app.renderer.plugins.interaction.resolution = KeepBuiltInResolutionValue;
-			} else if (ResolutionChangeMode == ResolutionChangeBehavior.Skip) {
-			}
+			// Resolution is handled by autoDensity: true in GameCanvas.tsx
 			app.renderer.resize(newWidth, newHeight);
 			if (menu != null) {
 				menu.onResize(OnResizeFlag.ALL);
