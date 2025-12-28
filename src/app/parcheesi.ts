@@ -125,25 +125,25 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 	// onResize() resizes itself, children and includes draw()
 	public onResize(_flag: OnResizeFlag) {
 		this.clear();
-		this.lineStyle(0);
 		let color = this.playerColor;
 		if (this.greyOut) {
 			color = regularCellColor;
 		} else {
 			color = mix(this.playerColor, regularCellColor, (this.cellBlockIndex / 3) / 7);
 		}
+		let fillColor = regularCellColor;
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
 			if (this.cellBlockIndex == 11 && !this.greyOut) {
 				// Special home cell
-				this.beginFill(color, 1);
+				fillColor = color;
 			} else {
-				this.beginFill(safeCellColor, 1);
+				fillColor = safeCellColor;
 			}
 		} else {
 			if (this.cellBlockIndex % 3 == 1) {
-				this.beginFill(color, 1);
+				fillColor = color;
 			} else {
-				this.beginFill(regularCellColor, 1);
+				fillColor = regularCellColor;
 			}
 		}
 		if (this.cellShapeType == CellShapeType.CORNER_LEFT || this.cellShapeType == CellShapeType.CORNER_RIGHT) {
@@ -153,20 +153,19 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 				.lineTo(D.CELL_WIDTH - D.CELL_GAP / 2, D.CELL_HEIGHT - D.CELL_GAP / 2 - D.CELL_RADIUS)
 				.arc(D.CELL_WIDTH - D.CELL_GAP / 2 - D.CELL_RADIUS, D.CELL_HEIGHT - D.CELL_GAP / 2 - D.CELL_RADIUS, D.CELL_RADIUS, 0, Math.PI / 2)
 				.lineTo(D.CELL_GAP / 1.5 + D.CELL_GAP / 2, D.CELL_HEIGHT - D.CELL_GAP / 2)
-				.closePath();
+				.closePath()
+				.fill(fillColor);
 			if (this.cellShapeType == CellShapeType.CORNER_RIGHT) {
 				this.pivot.x = D.CELL_WIDTH;
 				this.scale.set(-1, 1);
 			}
 		} else {
-			this.drawRoundedRect(D.CELL_GAP / 2, D.CELL_GAP / 2, D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT - D.CELL_GAP, D.CELL_RADIUS);
+			this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT - D.CELL_GAP, D.CELL_RADIUS)
+				.fill(fillColor);
 		}
-		this.endFill();
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
-			//this.beginHole(); // TODO(next)
-			this.drawStar(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 4, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 10);
+			this.star(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 4, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 10);
 			this.cut();
-			//this.endHole(); // TODO(next)
 		}
 	}
 
@@ -398,19 +397,21 @@ export class Piece extends PIXI.Container implements OnResize {
 		this.overlay.clear();
 
 		if (this.button.isDown() && this.button.isHovered()) {
-			this.overlay.beginFill(lighten(playerColors[this.colorIndex], 0.2));
+			this.overlay.circle(0, 0, D.CELL_HEIGHT * 0.4)
+				.fill(lighten(playerColors[this.colorIndex], 0.2));
 		} else {
-			this.overlay.beginFill(playerColors[this.colorIndex]);
 			if (this == this._board.pieceSelected) {
 				this.overlay.alpha = 1;
-				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceSelectedBorderColor, 1);
+				this.overlay.circle(0, 0, D.CELL_HEIGHT * 0.4)
+					.fill(playerColors[this.colorIndex])
+					.stroke({ width: D.CELL_HEIGHT * 0.15 / 2, color: pieceSelectedBorderColor });
 			} else {
 				this.overlay.alpha = 0.5;
-				this.overlay.lineStyle(D.CELL_HEIGHT * 0.15 / 2, pieceNonSelectedBorderColor, 1);
+				this.overlay.circle(0, 0, D.CELL_HEIGHT * 0.4)
+					.fill(playerColors[this.colorIndex])
+					.stroke({ width: D.CELL_HEIGHT * 0.15 / 2, color: pieceNonSelectedBorderColor });
 			}
 		}
-		this.overlay.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
-		this.overlay.endFill();
 		this.visible = true;
 	}
 
@@ -526,7 +527,7 @@ export class Dice extends PIXI.Container implements OnResize {
 		sprite.visible = true;
 		// sprite.texture.frame.copyFrom(rect);
 		// TO prevent bleeding of pixelated textures, use PIXI.SCALE_MODES.NEAREST:
-		sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR; //  floating-point values for scaling
+		sprite.texture.source.scaleMode = 'linear'; //  floating-point values for scaling
 		this.sprite = sprite;
 
 		this.addChild(this.sprite);
@@ -562,10 +563,9 @@ export class Dice extends PIXI.Container implements OnResize {
 		this.position.set(globalPosition.x, globalPosition.y);
 		this.overlay.clear();
 		if (this.button.isDown() && this.button.isHovered()) {
-			this.overlay.lineStyle(D.CELL_GAP, playerColors[colorIndex], 0.8);
-			this.overlay.beginFill(playerColors[colorIndex]);
-			this.overlay.drawRoundedRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, D.CELL_HEIGHT / 1.8);
-			this.overlay.endFill();
+			this.overlay.roundRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, D.CELL_HEIGHT / 1.8)
+				.fill(playerColors[colorIndex])
+				.stroke({ width: D.CELL_GAP, color: playerColors[colorIndex], alpha: 0.8 });
 		}
 		const currentDiceNumber = this.currentDiceNumber();
 		let frameIndex = (currentDiceNumber - 1);
@@ -662,12 +662,11 @@ export class Skip extends PIXI.Container implements OnResize {
 		this.rotation = colorIndex * (-Math.PI / 2);
 		if (this.board.isSkipPossible()) {
 			this.overlay.clear();
+			this.overlay.roundRect(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT, D.CELL_HEIGHT / 4)
+				.fill(playerColors[colorIndex]);
 			if (this.button.isDown() && this.button.isHovered()) {
-				this.overlay.lineStyle(D.CELL_GAP, playerColors[colorIndex], 0.8);
+				this.overlay.stroke({ width: D.CELL_GAP, color: playerColors[colorIndex], alpha: 0.8 });
 			}
-			this.overlay.beginFill(playerColors[colorIndex]);
-			this.overlay.drawRoundedRect(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT, D.CELL_HEIGHT / 4);
-			this.overlay.endFill();
 			this.visible = true;
 		} else {
 			this.visible = false;
@@ -689,12 +688,11 @@ export class Background extends PIXI.Graphics implements OnResize {
 	public onResize(_flag: OnResizeFlag): void {
 		const bgGap = D.CELL_HEIGHT / 4;
 		this.clear();
-		this.beginFill(backgroundBoxColor, 1);
 		const size = D.getViewportSize(this.renderer);
-		this.drawRoundedRect(bgGap, bgGap,
+		this.roundRect(bgGap, bgGap,
 			size.x - bgGap * 2,
-			size.y - bgGap * 2, bgGap * 2);
-		this.endFill();
+			size.y - bgGap * 2, bgGap * 2)
+			.fill(backgroundBoxColor);
 	}
 }
 
@@ -754,9 +752,8 @@ export class Highlighter extends PIXI.Graphics implements OnResize {
 	onResize(_flag: OnResizeFlag): void {
 		this.clear();
 
-		this.beginFill(playerColors[this.colorIndex]);
-		this.drawRoundedRect(D.CELL_GAP / 2, D.CELL_GAP / 2, 3 * D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT / 2 - D.CELL_GAP, D.CELL_RADIUS);
-		this.endFill();
+		this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, 3 * D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT / 2 - D.CELL_GAP, D.CELL_RADIUS)
+			.fill(playerColors[this.colorIndex]);
 		this.position.set(0, 8 * D.CELL_HEIGHT);
 		this.alpha = 0; //Initially hidden
 	}
@@ -1063,9 +1060,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			// Calculate every position of every cell
 			for (let p = 0; p < 24; p++) {
 				const fake = new PIXI.Graphics();
-				fake.beginFill(0x0, 1);
-				fake.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
-				fake.endFill();
+				fake.circle(0, 0, D.CELL_HEIGHT * 0.4).fill(0x0);
 				fake.position.set((p % 3) * D.CELL_WIDTH + D.CELL_WIDTH / 2, (Math.floor(p / 3)) * D.CELL_HEIGHT + D.CELL_HEIGHT / 2);
 				blockContainer.addChild(fake);
 				GameBoard.cellsByBlocksGlobalPositions.push(fake.getGlobalPosition());
@@ -1082,10 +1077,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			GameBoard.homeGlobalPositions.push(new Array<PIXI.Point>());
 			for (let piecePerColorIndex = 0; piecePerColorIndex < PIECES_PER_COLOR; piecePerColorIndex++) {
 				const homeGraphicsCell = new PIXI.Graphics();
-				homeGraphicsCell.beginFill(playerColors[colorIndex], 0);
-				homeGraphicsCell.lineStyle(D.CELL_HEIGHT * 0.1, playerColors[colorIndex], 0.1);
-				homeGraphicsCell.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
-				homeGraphicsCell.endFill();
+				homeGraphicsCell.circle(0, 0, D.CELL_HEIGHT * 0.4)
+					.fill({ color: playerColors[colorIndex], alpha: 0 })
+					.stroke({ width: D.CELL_HEIGHT * 0.1, color: playerColors[colorIndex], alpha: 0.1 });
 				homeGraphicsCell.position.set(D.CELL_WIDTH * 3 + D.CELL_HEIGHT / 2 + piecePerColorIndex * D.CELL_HEIGHT, D.CELL_HEIGHT * 3.5);
 				blockContainer.addChild(homeGraphicsCell);
 				GameBoard.homeGlobalPositions[colorIndex].push(homeGraphicsCell.getGlobalPosition());
@@ -1101,10 +1095,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			// For every color initiate goals
 			for (let piecePerColorIndex = 0; piecePerColorIndex < PIECES_PER_COLOR; piecePerColorIndex++) {
 				const goalGraphicsCell = new PIXI.Graphics();
-				goalGraphicsCell.beginFill(playerColors[colorIndex], 0);
-				goalGraphicsCell.lineStyle(D.CELL_HEIGHT * 0.1, playerColors[colorIndex], 0.1);
-				goalGraphicsCell.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
-				goalGraphicsCell.endFill();
+				goalGraphicsCell.circle(0, 0, D.CELL_HEIGHT * 0.4)
+					.fill({ color: playerColors[colorIndex], alpha: 0 })
+					.stroke({ width: D.CELL_HEIGHT * 0.1, color: playerColors[colorIndex], alpha: 0.1 });
 				let xDiff = 0;
 				let yDiff = 0;
 				if (piecePerColorIndex == 0) {
@@ -1129,9 +1122,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			for (let diceIndex = 0; diceIndex < 2; diceIndex++) {
 				// (Here we determine locations per each block)
 				const diceGraphicsCell = new PIXI.Graphics();
-				diceGraphicsCell.beginFill(playerColors[colorIndex], 1);
-				diceGraphicsCell.drawRoundedRect(0, 0, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, 8);
-				diceGraphicsCell.endFill();
+				diceGraphicsCell.roundRect(0, 0, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, 8).fill(playerColors[colorIndex]);
 				diceGraphicsCell.pivot.set(D.CELL_HEIGHT, D.CELL_HEIGHT);
 				diceGraphicsCell.position.set(D.CELL_WIDTH * 3 + D.CELL_HEIGHT + (D.CELL_HEIGHT * 2.5 * diceIndex) + D.CELL_HEIGHT, D.CELL_HEIGHT * 5 + D.CELL_HEIGHT);
 				blockContainer.addChild(diceGraphicsCell);
@@ -1145,9 +1136,8 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
 			const blockContainer = this.blocks[colorIndex];
 			const skipGraphicsCell = new PIXI.Graphics();
-			skipGraphicsCell.beginFill(playerColors[colorIndex], 0.2);
-			skipGraphicsCell.drawRoundedRect(0, 0, D.CELL_HEIGHT * 4 + D.CELL_HEIGHT / 2, D.CELL_HEIGHT, 8);
-			skipGraphicsCell.endFill();
+			skipGraphicsCell.roundRect(0, 0, D.CELL_HEIGHT * 4 + D.CELL_HEIGHT / 2, D.CELL_HEIGHT, 8)
+				.fill({ color: playerColors[colorIndex], alpha: 0.2 });
 			skipGraphicsCell.pivot.set((D.CELL_HEIGHT * 4 + D.CELL_HEIGHT / 2) / 2, D.CELL_HEIGHT / 2);
 			skipGraphicsCell.position.set(D.CELL_WIDTH * 4 + D.CELL_HEIGHT, D.CELL_HEIGHT * 8.5);
 			blockContainer.addChild(skipGraphicsCell);
@@ -1491,10 +1481,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 		const graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
 		graphics.clear();
-		graphics.beginFill(regularCellColor, 0.5);
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
-		graphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
-		graphics.endFill();
+		graphics.roundRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT)
+			.fill({ color: regularCellColor, alpha: 0.5 });
 
 		this.startGameButton.position.set(viewportSize.x / 2, viewportSize.y / 2);
 
@@ -1660,26 +1649,22 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 
 			let alpha = 0.25;
 			if (this.playersByColor[i]) {
-				//graphics.lineStyle(D.CELL_RADIUS, 0xFFFFFF, 1)
 				alpha = 0.8;
 			}
-			graphics.beginFill(playerColors[i], alpha);
 			const width = D.CELL_WIDTH * 3;
 			const height = D.CELL_HEIGHT * 7;
 			graphics.blendMode = 'exclusion';
 			graphics.pivot.set(0, 0);
 			graphics.position.set(0, 0);
 			const overlappingBorder = D.CELL_HEIGHT / 2;
-			graphics.drawRoundedRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, overlappingBorder);
-
-			graphics.endFill();
+			graphics.roundRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, overlappingBorder)
+				.fill({ color: playerColors[i], alpha });
 		}
 
 		this.startGameButtonGraphics.clear();
-		this.startGameButtonGraphics.beginFill(regularCellColor, 1);
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
-		this.startGameButtonGraphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
-		this.startGameButtonGraphics.endFill();
+		this.startGameButtonGraphics.roundRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT)
+			.fill(regularCellColor);
 
 		// let imageAlias = "cog"
 		// let ratio = WH_IMAGE_RATIO[imageAlias]
@@ -1842,7 +1827,7 @@ export class Cog extends PIXI.Container implements OnResize {
 			(this.muteSprite.height / 2) / this.muteSprite.scale.y);
 
 		if (this.menu.visible) {
-			this.gameBoardBase.filter([new PIXI.BlurFilter(5, 10)]);
+			this.gameBoardBase.filter([new PIXI.BlurFilter({ strength: 5, quality: 10 })]);
 		} else {
 			this.gameBoardBase.filter([]);
 		}
@@ -1881,17 +1866,14 @@ export class Menu extends PIXI.Container implements OnResize {
 
 		const bgGap = D.CELL_HEIGHT / 4;
 		this.graphics.clear();
-		this.graphics.beginFill(rgb('rgb(134,134,134)'), 0.5);
-		this.graphics.drawRoundedRect(bgGap, bgGap,
+		this.graphics.roundRect(bgGap, bgGap,
 			viewportSize.x - bgGap * 2,
-			viewportSize.y - bgGap * 2, bgGap * 2);
-		this.graphics.endFill();
-		// this.graphics.beginHole(); // TODO(next)
+			viewportSize.y - bgGap * 2, bgGap * 2)
+			.fill({ color: rgb('rgb(134,134,134)'), alpha: 0.5 });
 		const width = this.cog.getCogWidth();
 		const height = width / WH_IMAGE_RATIO["cog"];
 		const gap = this.cog.getCogGap();
-		this.graphics.drawEllipse(viewportSize.x - width / 2 - gap, gap + height / 2, (width / 2) * 1.5, (height / 2) * 1.5);
-		// this.graphics.endHole(); // TODO(next)
+		this.graphics.ellipse(viewportSize.x - width / 2 - gap, gap + height / 2, (width / 2) * 1.5, (height / 2) * 1.5);
 		this.graphics.cut();
 		this.restartButton.onResize(flag);
 	}
@@ -1947,7 +1929,6 @@ export class RestartButton extends PIXI.Container implements OnResize {
 	onResize(_flag: OnResizeFlag): void {
 		const viewportSize = D.getViewportSize(this.menu.cog.renderer);
 		this.graphics.clear();
-		this.graphics.beginFill(settingsButtonsColor, 1);
 		const width = this.menu.cog.getCogWidth();
 		const gap = this.menu.cog.getCogGap();
 
@@ -1965,8 +1946,8 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.sprite.position.set(viewportSize.x - width - gap * 2 - fontW - (buttonW - fontW) / 2, gap + (buttonH - fontH) / 2);
 
 
-		this.graphics.drawRoundedRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, D.CELL_HEIGHT / 2);
-		this.graphics.endFill();
+		this.graphics.roundRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, D.CELL_HEIGHT / 2)
+			.fill(settingsButtonsColor);
 
 		this.graphics.getChildAt(0).hitArea = new PIXI.Rectangle(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH);
 	}

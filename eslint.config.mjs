@@ -23,6 +23,7 @@ export default defineConfig([
     },
     rules: {
       "no-in-array/check": "warn",
+      "@typescript-eslint/no-deprecated": "warn",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
