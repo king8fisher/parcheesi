@@ -659,7 +659,7 @@ export class Skip extends PIXI.Container implements OnResize {
 
 	// TODO: Move out stuff that doesn't need to always update
 	update(delta: number) {
-		let colorIndex = this.board.whoGoesColorIndex;
+		const colorIndex = this.board.whoGoesColorIndex;
 		let globalPosition = GameBoard.skipGlobalPositions[colorIndex];
 		this.position.set(globalPosition.x, globalPosition.y);
 

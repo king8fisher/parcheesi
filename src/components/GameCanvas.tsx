@@ -40,15 +40,15 @@ const GameCanvas = () => {
         await loadParcheesiGame(app);
       })();
     });
-  }, []);
+  }, [once]);
 
   useEffect(() => {
+    const canvasRef = canvas.current;
     return () => {
-      if (canvas.current && canvas.current.el) {
-        canvas.current.el.remove();
-        canvas.current.el = null;
-
-      };
+      if (canvasRef && canvasRef.el) {
+        canvasRef.el.remove();
+        canvasRef.el = null;
+      }
     };
   }, []);
 

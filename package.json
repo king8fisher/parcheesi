@@ -6,32 +6,41 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest --run",
-    "wtest": "vitest",
+    "test:watch": "vitest",
     "purge": "powershell -Command \"Remove-Item -LiteralPath 'node_modules' -Force -Recurse\"",
-    "purgeNext": "powershell -Command \"Remove-Item -LiteralPath '.next' -Force -Recurse\""
+    "purgeNext": "powershell -Command \"Remove-Item -LiteralPath '.next' -Force -Recurse\"",
+    "upgrade-next": "pnpx @next/codemod@canary upgrade latest"
   },
   "dependencies": {
     "@pixi/core": "^7.4.2",
     "color": "^4.2.3",
     "howler": "^2.2.4",
-    "next": "14.2.5",
+    "next": "16.1.1",
     "pixi.js": "^8.3.2",
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@types/color": "^3.0.6",
     "@types/howler": "^2.2.11",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "16.1.1",
+    "eslint-plugin-no-in-array": "^1.2.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
+  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf",
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.7",
+      "@types/react-dom": "19.2.3"
+    }
+  }
 }

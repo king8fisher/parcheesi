@@ -1,9 +1,0 @@
-{
-	"name": "parcheesi-sw",
-	"version": "0.0.0",
-	"devDependencies": {
-		"typescript": "^3.9.6",
-		"webworker": "^0.8.4"
-	},
-	"dependencies": {}
-}
