@@ -1,12 +1,12 @@
 import { rgb } from "./colorUtils";
 
-export const regularCellColor = rgb('rgb(100,100,100)');
-export const safeCellColor = rgb('rgb(125,125,125)'); //0xD8A032;
+export const regularCellColor = rgb('rgb(90,95,105)');
+export const safeCellColor = rgb('rgb(115,120,130)');
 export const playerColors: Array<number> = [
-	rgb('rgb(236,102,64)'),
-	rgb('rgb(92,188,53)'),
-	rgb('rgb(38,153,196)'),
-	rgb('rgb(146,43,225)'),
+	rgb('rgb(230,95,50)'),   // Vibrant orange
+	rgb('rgb(75,190,60)'),   // Bright green
+	rgb('rgb(50,160,220)'),  // Bright blue
+	rgb('rgb(165,80,200)'),  // Vibrant purple
 ];
 export const diceUnusedColor = rgb('rgb(255,255,255)');
 export const diceUsedColor = rgb('rgb(100,100,100)');
@@ -16,7 +16,7 @@ export const settingsButtonsColor = rgb('rgb(163,163,163)');
 export const pieceSelectedBorderColor = rgb('rgb(255,255,255)');
 export const pieceNonSelectedBorderColor = rgb('rgb(30,30,30)');
 export const bgColor = rgb('rgb(50,0,0)');
-export const backgroundBoxColor = rgb('rgb(21,35,57)');
+export const backgroundBoxColor = rgb('rgb(18,28,42)');
 
 export const diceImageCellSize = 256
 export const diceImageCellsCount = 8

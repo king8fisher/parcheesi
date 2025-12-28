@@ -146,22 +146,31 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 				fillColor = regularCellColor;
 			}
 		}
+
+		// Create subtle gradient for cells for a more polished look
+		const cellGradient = new PIXI.FillGradient(0, 0, D.CELL_WIDTH, D.CELL_HEIGHT);
+		cellGradient.addColorStop(0, lighten(fillColor, 0.06));
+		cellGradient.addColorStop(1, fillColor);
+
+		// Smoother radius for cells
+		const smoothRadius = D.CELL_RADIUS * 1.5;
+
 		if (this.cellShapeType == CellShapeType.CORNER_LEFT || this.cellShapeType == CellShapeType.CORNER_RIGHT) {
 			this.moveTo(D.CELL_GAP / 1.5 + D.CELL_GAP / 2 + D.CELL_HEIGHT - D.CELL_GAP, D.CELL_GAP / 2)
-				.lineTo(D.CELL_WIDTH - D.CELL_GAP - D.CELL_RADIUS / 2, D.CELL_GAP / 2)
-				.arc(D.CELL_WIDTH - D.CELL_GAP / 2 - D.CELL_RADIUS, D.CELL_GAP / 2 + D.CELL_RADIUS, D.CELL_RADIUS, -Math.PI / 2, 0)
-				.lineTo(D.CELL_WIDTH - D.CELL_GAP / 2, D.CELL_HEIGHT - D.CELL_GAP / 2 - D.CELL_RADIUS)
-				.arc(D.CELL_WIDTH - D.CELL_GAP / 2 - D.CELL_RADIUS, D.CELL_HEIGHT - D.CELL_GAP / 2 - D.CELL_RADIUS, D.CELL_RADIUS, 0, Math.PI / 2)
+				.lineTo(D.CELL_WIDTH - D.CELL_GAP - smoothRadius / 2, D.CELL_GAP / 2)
+				.arc(D.CELL_WIDTH - D.CELL_GAP / 2 - smoothRadius, D.CELL_GAP / 2 + smoothRadius, smoothRadius, -Math.PI / 2, 0)
+				.lineTo(D.CELL_WIDTH - D.CELL_GAP / 2, D.CELL_HEIGHT - D.CELL_GAP / 2 - smoothRadius)
+				.arc(D.CELL_WIDTH - D.CELL_GAP / 2 - smoothRadius, D.CELL_HEIGHT - D.CELL_GAP / 2 - smoothRadius, smoothRadius, 0, Math.PI / 2)
 				.lineTo(D.CELL_GAP / 1.5 + D.CELL_GAP / 2, D.CELL_HEIGHT - D.CELL_GAP / 2)
 				.closePath()
-				.fill(fillColor);
+				.fill(cellGradient);
 			if (this.cellShapeType == CellShapeType.CORNER_RIGHT) {
 				this.pivot.x = D.CELL_WIDTH;
 				this.scale.set(-1, 1);
 			}
 		} else {
-			this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT - D.CELL_GAP, D.CELL_RADIUS)
-				.fill(fillColor);
+			this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT - D.CELL_GAP, smoothRadius)
+				.fill(cellGradient);
 		}
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
 			this.star(D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2, 4, D.CELL_HEIGHT / 3, D.CELL_HEIGHT / 10);
@@ -563,9 +572,16 @@ export class Dice extends PIXI.Container implements OnResize {
 		this.position.set(globalPosition.x, globalPosition.y);
 		this.overlay.clear();
 		if (this.button.isDown() && this.button.isHovered()) {
-			this.overlay.roundRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, D.CELL_HEIGHT / 1.8)
-				.fill(playerColors[colorIndex])
-				.stroke({ width: D.CELL_GAP, color: playerColors[colorIndex], alpha: 0.8 });
+			const diceRadius = D.CELL_HEIGHT / 1.6;
+
+			// Create gradient for dice click overlay
+			const diceGradient = new PIXI.FillGradient(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT, D.CELL_HEIGHT);
+			diceGradient.addColorStop(0, lighten(playerColors[colorIndex], 0.15));
+			diceGradient.addColorStop(1, playerColors[colorIndex]);
+
+			this.overlay.roundRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, diceRadius)
+				.fill(diceGradient)
+				.stroke({ width: D.CELL_GAP, color: lighten(playerColors[colorIndex], 0.2), alpha: 0.9 });
 		}
 		const currentDiceNumber = this.currentDiceNumber();
 		let frameIndex = (currentDiceNumber - 1);
@@ -662,10 +678,17 @@ export class Skip extends PIXI.Container implements OnResize {
 		this.rotation = colorIndex * (-Math.PI / 2);
 		if (this.board.isSkipPossible()) {
 			this.overlay.clear();
-			this.overlay.roundRect(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT, D.CELL_HEIGHT / 4)
-				.fill(playerColors[colorIndex]);
+			const skipRadius = D.CELL_HEIGHT / 3;
+
+			// Create gradient for skip button
+			const skipGradient = new PIXI.FillGradient(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2);
+			skipGradient.addColorStop(0, lighten(playerColors[colorIndex], 0.1));
+			skipGradient.addColorStop(1, playerColors[colorIndex]);
+
+			this.overlay.roundRect(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT, skipRadius)
+				.fill(skipGradient);
 			if (this.button.isDown() && this.button.isHovered()) {
-				this.overlay.stroke({ width: D.CELL_GAP, color: playerColors[colorIndex], alpha: 0.8 });
+				this.overlay.stroke({ width: D.CELL_GAP, color: lighten(playerColors[colorIndex], 0.2), alpha: 0.9 });
 			}
 			this.visible = true;
 		} else {
@@ -689,10 +712,17 @@ export class Background extends PIXI.Graphics implements OnResize {
 		const bgGap = D.CELL_HEIGHT / 4;
 		this.clear();
 		const size = D.getViewportSize(this.renderer);
+		const radius = bgGap * 2.5;
+
+		// Create a subtle radial gradient for the background
+		const gradientFill = new PIXI.FillGradient(size.x / 2, size.y / 2, size.x / 2, Math.max(size.x, size.y) * 0.7);
+		gradientFill.addColorStop(0, lighten(backgroundBoxColor, 0.08));
+		gradientFill.addColorStop(1, backgroundBoxColor);
+
 		this.roundRect(bgGap, bgGap,
 			size.x - bgGap * 2,
-			size.y - bgGap * 2, bgGap * 2)
-			.fill(backgroundBoxColor);
+			size.y - bgGap * 2, radius)
+			.fill(gradientFill);
 	}
 }
 
@@ -752,8 +782,18 @@ export class Highlighter extends PIXI.Graphics implements OnResize {
 	onResize(_flag: OnResizeFlag): void {
 		this.clear();
 
-		this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, 3 * D.CELL_WIDTH - D.CELL_GAP, D.CELL_HEIGHT / 2 - D.CELL_GAP, D.CELL_RADIUS)
-			.fill(playerColors[this.colorIndex]);
+		const highlightWidth = 3 * D.CELL_WIDTH - D.CELL_GAP;
+		const highlightHeight = D.CELL_HEIGHT / 2 - D.CELL_GAP;
+		const smoothRadius = D.CELL_RADIUS * 1.5;
+
+		// Create gradient for the turn highlighter
+		const highlightGradient = new PIXI.FillGradient(0, 0, highlightWidth, 0);
+		highlightGradient.addColorStop(0, lighten(playerColors[this.colorIndex], 0.15));
+		highlightGradient.addColorStop(0.5, playerColors[this.colorIndex]);
+		highlightGradient.addColorStop(1, lighten(playerColors[this.colorIndex], 0.15));
+
+		this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, highlightWidth, highlightHeight, smoothRadius)
+			.fill(highlightGradient);
 		this.position.set(0, 8 * D.CELL_HEIGHT);
 		this.alpha = 0; //Initially hidden
 	}
@@ -1482,8 +1522,15 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		const graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
 		graphics.clear();
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
-		graphics.roundRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT)
-			.fill({ color: regularCellColor, alpha: 0.5 });
+		const buttonRadius = D.CELL_HEIGHT * 1.2;
+
+		// Create a subtle gradient for the restart button
+		const buttonGradient = new PIXI.FillGradient(-width / 2, -width / 2, width / 2, width / 2);
+		buttonGradient.addColorStop(0, lighten(regularCellColor, 0.12));
+		buttonGradient.addColorStop(1, mix(regularCellColor, 0x000000, 0.1));
+
+		graphics.roundRect(-width / 2, -width / 2, width, width, buttonRadius)
+			.fill({ fill: buttonGradient, alpha: 0.6 });
 
 		this.startGameButton.position.set(viewportSize.x / 2, viewportSize.y / 2);
 
@@ -1647,9 +1694,9 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			const graphics = <PIXI.Graphics>this.playerSelectionButtons[i].getChildAt(0);
 			graphics.clear();
 
-			let alpha = 0.25;
+			let alpha = 0.2;
 			if (this.playersByColor[i]) {
-				alpha = 0.8;
+				alpha = 0.75;
 			}
 			const width = D.CELL_WIDTH * 3;
 			const height = D.CELL_HEIGHT * 7;
@@ -1657,14 +1704,30 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			graphics.pivot.set(0, 0);
 			graphics.position.set(0, 0);
 			const overlappingBorder = D.CELL_HEIGHT / 2;
-			graphics.roundRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, overlappingBorder)
-				.fill({ color: playerColors[i], alpha });
+			const radius = overlappingBorder * 1.2;
+
+			// Create gradient for player selection overlay
+			const gradientFill = new PIXI.FillGradient(0, 0, width, height);
+			const baseColor = playerColors[i];
+			gradientFill.addColorStop(0, lighten(baseColor, 0.15));
+			gradientFill.addColorStop(0.5, baseColor);
+			gradientFill.addColorStop(1, mix(baseColor, 0x000000, 0.15));
+
+			graphics.roundRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, radius)
+				.fill({ fill: gradientFill, alpha });
 		}
 
 		this.startGameButtonGraphics.clear();
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
-		this.startGameButtonGraphics.roundRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT)
-			.fill(regularCellColor);
+		const buttonRadius = D.CELL_HEIGHT * 1.2;
+
+		// Create a subtle gradient for the center button
+		const buttonGradient = new PIXI.FillGradient(-width / 2, -width / 2, width / 2, width / 2);
+		buttonGradient.addColorStop(0, lighten(regularCellColor, 0.12));
+		buttonGradient.addColorStop(1, mix(regularCellColor, 0x000000, 0.1));
+
+		this.startGameButtonGraphics.roundRect(-width / 2, -width / 2, width, width, buttonRadius)
+			.fill(buttonGradient);
 
 		// let imageAlias = "cog"
 		// let ratio = WH_IMAGE_RATIO[imageAlias]
@@ -1865,11 +1928,18 @@ export class Menu extends PIXI.Container implements OnResize {
 		const viewportSize = D.getViewportSize(this.cog.renderer);
 
 		const bgGap = D.CELL_HEIGHT / 4;
+		const menuRadius = bgGap * 2.5;
 		this.graphics.clear();
+
+		// Create subtle gradient for menu overlay
+		const menuGradient = new PIXI.FillGradient(viewportSize.x / 2, 0, viewportSize.x / 2, viewportSize.y);
+		menuGradient.addColorStop(0, rgb('rgb(100,105,115)'));
+		menuGradient.addColorStop(1, rgb('rgb(70,75,85)'));
+
 		this.graphics.roundRect(bgGap, bgGap,
 			viewportSize.x - bgGap * 2,
-			viewportSize.y - bgGap * 2, bgGap * 2)
-			.fill({ color: rgb('rgb(134,134,134)'), alpha: 0.5 });
+			viewportSize.y - bgGap * 2, menuRadius)
+			.fill({ fill: menuGradient, alpha: 0.65 });
 		const width = this.cog.getCogWidth();
 		const height = width / WH_IMAGE_RATIO["cog"];
 		const gap = this.cog.getCogGap();
@@ -1945,9 +2015,15 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		const buttonW = fontW / factor;
 		this.sprite.position.set(viewportSize.x - width - gap * 2 - fontW - (buttonW - fontW) / 2, gap + (buttonH - fontH) / 2);
 
+		const buttonRadius = D.CELL_HEIGHT / 1.8;
 
-		this.graphics.roundRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, D.CELL_HEIGHT / 2)
-			.fill(settingsButtonsColor);
+		// Create gradient for restart button
+		const buttonGradient = new PIXI.FillGradient(viewportSize.x - width - gap * 2 - buttonW, gap, viewportSize.x - width - gap * 2, gap + buttonH);
+		buttonGradient.addColorStop(0, lighten(settingsButtonsColor, 0.1));
+		buttonGradient.addColorStop(1, settingsButtonsColor);
+
+		this.graphics.roundRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, buttonRadius)
+			.fill(buttonGradient);
 
 		this.graphics.getChildAt(0).hitArea = new PIXI.Rectangle(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH);
 	}

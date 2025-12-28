@@ -25,9 +25,10 @@ const GameCanvas = () => {
           hello: true,
           resizeTo: ref.current,
           antialias: true,
-          resolution: window.devicePixelRatio,
-          autoDensity: false,
+          resolution: window.devicePixelRatio || 1,
+          autoDensity: true,  // Let Pixi handle CSS scaling for high-DPI
           backgroundColor: 0,
+          powerPreference: 'high-performance',
         });
 
         ref.current?.appendChild(app.canvas);

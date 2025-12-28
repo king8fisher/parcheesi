@@ -10,7 +10,7 @@ export enum ResolutionChangeBehavior {
 }
 
 export const KeepBuiltInResolutionValue = 3;
-export const ResolutionChangeMode = ResolutionChangeBehavior.Deal;
+export const ResolutionChangeMode = ResolutionChangeBehavior.Skip;  // Using autoDensity: true in GameCanvas instead
 
 
 export const IMAGE_ALIASES: Record<string, string> = {
@@ -181,7 +181,6 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 			} else if (ResolutionChangeMode == ResolutionChangeBehavior.Skip) {
 			}
 			app.renderer.resize(newWidth, newHeight);
-			// Renderer's size depends on renderer.resolution automatically
 			if (menu != null) {
 				menu.onResize(OnResizeFlag.ALL);
 			}
