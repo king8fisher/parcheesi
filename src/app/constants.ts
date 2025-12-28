@@ -1,22 +1,22 @@
-import * as Color from "color";
+import { rgb } from "./colorUtils";
 
-export const regularCellColor = Color.rgb('rgb(100,100,100)').rgbNumber();
-export const safeCellColor = Color.rgb('rgb(125,125,125)').rgbNumber(); //0xD8A032;
+export const regularCellColor = rgb('rgb(100,100,100)');
+export const safeCellColor = rgb('rgb(125,125,125)'); //0xD8A032;
 export const playerColors: Array<number> = [
-	Color.rgb('rgb(236,102,64)').rgbNumber(),
-	Color.rgb('rgb(92,188,53)').rgbNumber(),
-	Color.rgb('rgb(38,153,196)').rgbNumber(),
-	Color.rgb('rgb(146,43,225)').rgbNumber(),
+	rgb('rgb(236,102,64)'),
+	rgb('rgb(92,188,53)'),
+	rgb('rgb(38,153,196)'),
+	rgb('rgb(146,43,225)'),
 ];
-export const diceUnusedColor = Color.rgb('rgb(255,255,255)').rgbNumber()
-export const diceUsedColor = Color.rgb('rgb(100,100,100)').rgbNumber()
-//const cogColor = Color.rgb('rgb(150,150,150)').rgbNumber()
-//const cogColor = Color.rgb('rgb(255,255,255)').rgbNumber()
-export const settingsButtonsColor = Color.rgb('rgb(163,163,163)').rgbNumber()
-export const pieceSelectedBorderColor = Color.rgb('rgb(255,255,255)').rgbNumber()
-export const pieceNonSelectedBorderColor = Color.rgb('rgb(30,30,30)').rgbNumber()
-export const bgColor = Color.rgb('rgb(50,0,0)').rgbNumber()
-export const backgroundBoxColor = Color.rgb('rgb(21,35,57)').rgbNumber()
+export const diceUnusedColor = rgb('rgb(255,255,255)');
+export const diceUsedColor = rgb('rgb(100,100,100)');
+//const cogColor = rgb('rgb(150,150,150)');
+//const cogColor = rgb('rgb(255,255,255)');
+export const settingsButtonsColor = rgb('rgb(163,163,163)');
+export const pieceSelectedBorderColor = rgb('rgb(255,255,255)');
+export const pieceNonSelectedBorderColor = rgb('rgb(30,30,30)');
+export const bgColor = rgb('rgb(50,0,0)');
+export const backgroundBoxColor = rgb('rgb(21,35,57)');
 
 export const diceImageCellSize = 256
 export const diceImageCellsCount = 8

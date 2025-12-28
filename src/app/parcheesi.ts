@@ -1,9 +1,5 @@
-import * as Color from "color/index";
 import * as PIXI from 'pixi.js';
-
-import { utils } from '@pixi/core';
-
-const { hex2string } = utils;
+import { lighten, mix, rgb } from "./colorUtils";
 
 import {
 	ALLOW_SKIP_AFTER_FIRST_MOVE,
@@ -25,8 +21,8 @@ import {
 	WH_IMAGE_RATIO
 } from "./main";
 
-import { tweenFunctions } from "./util";
 import { Sounds } from "./sounds";
+import { tweenFunctions } from "./util";
 
 export enum OnResizeFlag {
 	SIZE = 0x01,
@@ -130,22 +126,22 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 	public onResize(_flag: OnResizeFlag) {
 		this.clear();
 		this.lineStyle(0);
-		let color = Color.rgb(hex2string(this.playerColor));
+		let color = this.playerColor;
 		if (this.greyOut) {
-			color = Color.rgb(hex2string(regularCellColor));
+			color = regularCellColor;
 		} else {
-			color = color.mix(Color.rgb(hex2string(regularCellColor)), (this.cellBlockIndex / 3) / 7);
+			color = mix(this.playerColor, regularCellColor, (this.cellBlockIndex / 3) / 7);
 		}
 		if (this.cellFunctionType == CellFunctionType.SAFE_CELL) {
 			if (this.cellBlockIndex == 11 && !this.greyOut) {
 				// Special home cell
-				this.beginFill(color.rgbNumber(), 1);
+				this.beginFill(color, 1);
 			} else {
 				this.beginFill(safeCellColor, 1);
 			}
 		} else {
 			if (this.cellBlockIndex % 3 == 1) {
-				this.beginFill(color.rgbNumber(), 1);
+				this.beginFill(color, 1);
 			} else {
 				this.beginFill(regularCellColor, 1);
 			}
@@ -402,8 +398,7 @@ export class Piece extends PIXI.Container implements OnResize {
 		this.overlay.clear();
 
 		if (this.button.isDown() && this.button.isHovered()) {
-			this.overlay.beginFill((Color.rgb(hex2string(playerColors[this.colorIndex])
-			)).lighten(0.2).rgbNumber());
+			this.overlay.beginFill(lighten(playerColors[this.colorIndex], 0.2));
 		} else {
 			this.overlay.beginFill(playerColors[this.colorIndex]);
 			if (this == this._board.pieceSelected) {
@@ -1462,7 +1457,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	//============PUBLIC=================================================================
 	// TODO: Move out stuff that doesn't need to always update
-	public update(_delta: number) {
+	public update(delta: number) {
 		super.update(delta);
 		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
 			for (let i = 0; i < PIECES_PER_COLOR; i++) {
@@ -1496,8 +1491,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 		const graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
 		graphics.clear();
-		const color = Color.rgb(hex2string(regularCellColor));
-		graphics.beginFill(color.rgbNumber(), 0.5);
+		graphics.beginFill(regularCellColor, 0.5);
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
 		graphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
 		graphics.endFill();
@@ -1664,14 +1658,12 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			const graphics = <PIXI.Graphics>this.playerSelectionButtons[i].getChildAt(0);
 			graphics.clear();
 
-			const color = Color.rgb(hex2string(playerColors[i]));
-
 			let alpha = 0.25;
 			if (this.playersByColor[i]) {
 				//graphics.lineStyle(D.CELL_RADIUS, 0xFFFFFF, 1)
 				alpha = 0.8;
 			}
-			graphics.beginFill(color.rgbNumber(), alpha);
+			graphics.beginFill(playerColors[i], alpha);
 			const width = D.CELL_WIDTH * 3;
 			const height = D.CELL_HEIGHT * 7;
 			graphics.blendMode = 'exclusion';
@@ -1684,8 +1676,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		}
 
 		this.startGameButtonGraphics.clear();
-		const color = Color.rgb(hex2string(regularCellColor));
-		this.startGameButtonGraphics.beginFill(color.rgbNumber(), 1);
+		this.startGameButtonGraphics.beginFill(regularCellColor, 1);
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
 		this.startGameButtonGraphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
 		this.startGameButtonGraphics.endFill();
@@ -1711,7 +1702,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 	}
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(_delta: number) {
+	update(delta: number) {
 		super.update(delta);
 	}
 
@@ -1890,7 +1881,7 @@ export class Menu extends PIXI.Container implements OnResize {
 
 		const bgGap = D.CELL_HEIGHT / 4;
 		this.graphics.clear();
-		this.graphics.beginFill(Color.rgb('rgb(134,134,134)').rgbNumber(), 0.5);
+		this.graphics.beginFill(rgb('rgb(134,134,134)'), 0.5);
 		this.graphics.drawRoundedRect(bgGap, bgGap,
 			viewportSize.x - bgGap * 2,
 			viewportSize.y - bgGap * 2, bgGap * 2);

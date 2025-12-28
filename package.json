@@ -14,17 +14,15 @@
     "upgrade-next": "pnpx @next/codemod@canary upgrade latest"
   },
   "dependencies": {
-    "@pixi/core": "^7.4.2",
-    "color": "^4.2.3",
     "howler": "^2.2.4",
     "next": "16.1.1",
-    "pixi.js": "^8.3.2",
+    "pixi.js": "^8.14.3",
+    "precise-colors": "^1.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
-    "@types/color": "^3.0.6",
     "@types/howler": "^2.2.11",
     "@types/node": "^20",
     "@types/react": "19.2.7",
