@@ -23,6 +23,14 @@ export default defineConfig([
     },
     rules: {
       "no-in-array/check": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   globalIgnores([".next/**", "node_modules/**"]),

@@ -11,7 +11,7 @@ export type Sounds = {
 
 export const initSounds = (): Sounds => {
   // ------------ sounds ----------------------------------------
-  let sounds: Record<string, Howl> = {};
+  const sounds: Record<string, Howl> = {};
   const GLOBAL_VOLUME = 0.5;
   let CURRENT_VOLUME = 0;
 
@@ -50,7 +50,7 @@ export const initSounds = (): Sounds => {
 
   function loadSound(name: string, url: string | string[], volume: number) {
     //loader.add('tada', '/sounds/tada.mp3')
-    let s = new Howl({
+    const s = new Howl({
       autoplay: false,
       src: url,
       preload: true,

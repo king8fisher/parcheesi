@@ -49,11 +49,11 @@ export class D {
 
 	static recalculateCellSizes(renderer: PIXI.Renderer) {
 		// height to width ratio
-		let ratio = 30 / 75;
-		let amountOfWidths = (3 + ratio * 14) + 2; // (+ extra spacing)
+		const ratio = 30 / 75;
+		const amountOfWidths = (3 + ratio * 14) + 2; // (+ extra spacing)
 		//======================
 
-		let size = this.getViewportSize(renderer);
+		const size = this.getViewportSize(renderer);
 		let box = size.x;
 		if (size.y < size.x) {
 			box = size.y;
@@ -119,7 +119,7 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 			this.cellShapeType = CellShapeType.CORNER_RIGHT;
 		}
 		this.cellFunctionType = CellFunctionType.ORDINARY_CELL;
-		let found = [9, 11, 22].indexOf(cellIndexInTheBlock);
+		const found = [9, 11, 22].indexOf(cellIndexInTheBlock);
 		if (found >= 0) {
 			this.cellFunctionType = CellFunctionType.SAFE_CELL;
 		}
@@ -127,7 +127,7 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 	}
 
 	// onResize() resizes itself, children and includes draw()
-	public onResize(flag: OnResizeFlag) {
+	public onResize(_flag: OnResizeFlag) {
 		this.clear();
 		this.lineStyle(0);
 		let color = Color.rgb(hex2string(this.playerColor));
@@ -359,7 +359,7 @@ export class Piece extends PIXI.Container implements OnResize {
 
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(delta: number) {
+	update(_delta: number) {
 		if (!this._board.isPlayerPlaying(this.colorIndex)) {
 			this.visible = false;
 			return;
@@ -386,15 +386,15 @@ export class Piece extends PIXI.Container implements OnResize {
 			this.overlay.clear();
 			return;
 		} else {
-			let index = GameBoard.getGlobalCellIndex(this.colorIndex, (this.pathIndex) % GameBoard.pathCellsByBlocksIndexes.length);
+			const index = GameBoard.getGlobalCellIndex(this.colorIndex, (this.pathIndex) % GameBoard.pathCellsByBlocksIndexes.length);
 			desiredDestinationPosition = GameBoard.cellsByBlocksGlobalPositions[index];
 		}
 
 		if (this.tweenTimeStart < 0 || this._board.timePassed >= this.tweenTimeEnd) {
 			this.position.copyFrom(desiredDestinationPosition);
 		} else {
-			let x = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionX, desiredDestinationPosition.x, this.tweenTimeEnd - this.tweenTimeStart);
-			let y = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionY, desiredDestinationPosition.y, this.tweenTimeEnd - this.tweenTimeStart);
+			const x = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionX, desiredDestinationPosition.x, this.tweenTimeEnd - this.tweenTimeStart);
+			const y = tweenFunctions.easeOutExpo(this._board.timePassed - this.tweenTimeStart, this.prevPositionY, desiredDestinationPosition.y, this.tweenTimeEnd - this.tweenTimeStart);
 			this.position.x = x;
 			this.position.y = y;
 		}
@@ -561,9 +561,9 @@ export class Dice extends PIXI.Container implements OnResize {
 	}
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(delta: number) {
-		let colorIndex = this.board.whoGoesColorIndex;
-		let globalPosition = GameBoard.dicesGlobalPositions[colorIndex][this.internalDiceIndex];
+	update(_delta: number) {
+		const colorIndex = this.board.whoGoesColorIndex;
+		const globalPosition = GameBoard.dicesGlobalPositions[colorIndex][this.internalDiceIndex];
 		this.position.set(globalPosition.x, globalPosition.y);
 		this.overlay.clear();
 		if (this.button.isDown() && this.button.isHovered()) {
@@ -572,7 +572,7 @@ export class Dice extends PIXI.Container implements OnResize {
 			this.overlay.drawRoundedRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, D.CELL_HEIGHT / 1.8);
 			this.overlay.endFill();
 		}
-		let currentDiceNumber = this.currentDiceNumber();
+		const currentDiceNumber = this.currentDiceNumber();
 		let frameIndex = (currentDiceNumber - 1);
 		if (currentDiceNumber == BONUS_FOR_REACHING_GOAL) {
 			frameIndex = 6;
@@ -599,7 +599,7 @@ export class Dice extends PIXI.Container implements OnResize {
 class SkipButtonBehavior extends ButtonBehaviorContainer {
 	owner: Skip;
 
-	constructor(owner: Skip, sounds: Sounds) {
+	constructor(owner: Skip, _sounds: Sounds) {
 		super(owner.board.sounds);
 		this.owner = owner;
 		this.hoverChanged();
@@ -640,27 +640,27 @@ export class Skip extends PIXI.Container implements OnResize {
 		this.button.hitArea = new PIXI.Rectangle(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT);
 		this.addChild(this.button);
 
-		let text = PIXI.Sprite.from(IMAGE_ALIASES["skip"]);
+		const text = PIXI.Sprite.from(IMAGE_ALIASES["skip"]);
 		text.anchor.set(0.5, 0.5);
 		this.button.addChild(text);
 
 		this.onResize(OnResizeFlag.ALL);
 	}
 
-	onResize(flag: OnResizeFlag): void {
-		let width = D.CELL_WIDTH * 0.8;
-		let text = <PIXI.Sprite>this.button.getChildAt(0);
-		let imageAlias = "skip";
-		let ratio = WH_IMAGE_RATIO[imageAlias];
+	onResize(_flag: OnResizeFlag): void {
+		const width = D.CELL_WIDTH * 0.8;
+		const text = <PIXI.Sprite>this.button.getChildAt(0);
+		const imageAlias = "skip";
+		const ratio = WH_IMAGE_RATIO[imageAlias];
 		text.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 		text.width = width * 0.7;
 		text.height = text.width / ratio;
 	}
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(delta: number) {
+	update(_delta: number) {
 		const colorIndex = this.board.whoGoesColorIndex;
-		let globalPosition = GameBoard.skipGlobalPositions[colorIndex];
+		const globalPosition = GameBoard.skipGlobalPositions[colorIndex];
 		this.position.set(globalPosition.x, globalPosition.y);
 
 		// Rotate the whole button toward the player
@@ -691,11 +691,11 @@ export class Background extends PIXI.Graphics implements OnResize {
 	}
 
 	// onResize() resizes itself, children and includes draw()
-	public onResize(flag: OnResizeFlag): void {
-		let bgGap = D.CELL_HEIGHT / 4;
+	public onResize(_flag: OnResizeFlag): void {
+		const bgGap = D.CELL_HEIGHT / 4;
 		this.clear();
 		this.beginFill(backgroundBoxColor, 1);
-		let size = D.getViewportSize(this.renderer);
+		const size = D.getViewportSize(this.renderer);
 		this.drawRoundedRect(bgGap, bgGap,
 			size.x - bgGap * 2,
 			size.y - bgGap * 2, bgGap * 2);
@@ -712,9 +712,9 @@ export class BlockContainer extends PIXI.Container implements OnResize {
 		this.board = board;
 		this.colorIndex = colorIndex;
 
-		let color = playerColors[this.colorIndex];
+		const color = playerColors[this.colorIndex];
 		for (let i = 0; i < 24; i++) {
-			let cell = new CellGraphics(i, color);
+			const cell = new CellGraphics(i, color);
 			this.addChild(cell);
 			//cell.position.set((i % 3) * Dimensions.CELL_WIDTH, (Math.floor(i / 3)) * Dimensions.CELL_HEIGHT);
 		}
@@ -726,11 +726,11 @@ export class BlockContainer extends PIXI.Container implements OnResize {
 	public onResize(flag: OnResizeFlag): void {
 		let greyOut = true;
 		if (this.board instanceof GameBoard) {
-			let board = <GameBoard>this.board;
+			const board = <GameBoard>this.board;
 			greyOut = !board.isPlayerPlaying(this.colorIndex);
 		}
 		for (let i = 0; i < 24; i++) {
-			let cell = <CellGraphics>this.getChildAt(i);
+			const cell = <CellGraphics>this.getChildAt(i);
 			// Reposition and re-draw
 			cell.position.set((i % 3) * D.CELL_WIDTH, (Math.floor(i / 3)) * D.CELL_HEIGHT);
 			cell.setGreyOut(greyOut);
@@ -738,7 +738,7 @@ export class BlockContainer extends PIXI.Container implements OnResize {
 		}
 
 		this.pivot.set(D.CELL_WIDTH * 3 / 2, -D.CELL_WIDTH * 3 / 2 + D.CELL_HEIGHT);
-		let viewportSize = D.getViewportSize(this.board.renderer);
+		const viewportSize = D.getViewportSize(this.board.renderer);
 		this.position.set(viewportSize.x / 2, viewportSize.y / 2);
 		this.rotation = (-Math.PI / 2) * this.colorIndex;
 	}
@@ -756,7 +756,7 @@ export class Highlighter extends PIXI.Graphics implements OnResize {
 	}
 
 	// onResize() resizes itself, children and includes draw()
-	onResize(flag: OnResizeFlag): void {
+	onResize(_flag: OnResizeFlag): void {
 		this.clear();
 
 		this.beginFill(playerColors[this.colorIndex]);
@@ -767,7 +767,7 @@ export class Highlighter extends PIXI.Graphics implements OnResize {
 	}
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(delta: number) {
+	update(_delta: number) {
 		if (this.board.wonColorIndex >= 0) {
 			this.alpha = (this.board.wonColorIndex == this.colorIndex ? 0.75 + Math.sin(this.board.timePassed * 0.01) * 0.25 : 0);
 		} else {
@@ -812,7 +812,7 @@ export class GameBoardBase extends PIXI.Graphics implements OnResize {
 
 		this.blocks.length = 0;
 		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
-			let blockContainer = new BlockContainer(this, colorIndex);
+			const blockContainer = new BlockContainer(this, colorIndex);
 			this.addChild(blockContainer);
 			// Saving into array
 			this.blocks.push(blockContainer);
@@ -824,7 +824,7 @@ export class GameBoardBase extends PIXI.Graphics implements OnResize {
 	public timePassed = 0.0;
 
 	// TODO: Move out stuff that doesn't need to always update
-	public update(delta: number) {
+	public update(_delta: number) {
 		//this.timePassed += delta
 		this.timePassed = performance.now();
 	}
@@ -938,7 +938,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		GameBoard.pathCellsByBlocksIndexes.length = 0; // Erase array
 		GameBoard.pathCellsByBlocksIndexes.push(11, 8, 5, 2);
 		for (let repeat = 0; repeat < 3; repeat++) {
-			let skip = (repeat + 1) * 24;
+			const skip = (repeat + 1) * 24;
 			for (let i = 0; i < 8; i++) {
 				GameBoard.pathCellsByBlocksIndexes.push(skip + i * 3);
 			}
@@ -981,9 +981,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 			//this.addChild(blockContainer);
 			// Saving into array
 			//this.blocks.push(blockContainer)
-			let blockContainer = this.blocks[colorIndex];
+			const blockContainer = this.blocks[colorIndex];
 
-			let highlighter = new Highlighter(this, colorIndex);
+			const highlighter = new Highlighter(this, colorIndex);
 			blockContainer.addChild(highlighter);
 			// Saving into array
 			this.highlighters.push(highlighter);
@@ -995,7 +995,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
 			this.pieces.push(new Array<Piece>());
 			for (let i = 0; i < PIECES_PER_COLOR; i++) {
-				let g = new Piece(this, colorIndex, i);
+				const g = new Piece(this, colorIndex, i);
 
 				// For debugging the game ending
 				// g.pathIndex = 65 + i
@@ -1006,7 +1006,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		}
 
 		for (let diceIndex = 0; diceIndex < 2; diceIndex++) {
-			let dice = new Dice(this, diceIndex);
+			const dice = new Dice(this, diceIndex);
 			this.addChild(dice);
 			this.dices.push(dice);
 		}
@@ -1040,11 +1040,11 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		}(this);
 		this.startGameButton.visible = false;
 
-		let graphics = new PIXI.Graphics();
+		const graphics = new PIXI.Graphics();
 		this.startGameButton.addChild(graphics);
 		this.addChild(this.startGameButton);
 
-		let text = PIXI.Sprite.from(IMAGE_ALIASES["again"]);
+		const text = PIXI.Sprite.from(IMAGE_ALIASES["again"]);
 		text.anchor.set(0.5, 0.5);
 		this.startGameButton.addChild(text);
 		this.addChild(this.startGameButton);
@@ -1064,10 +1064,10 @@ export class GameBoard extends GameBoardBase implements OnResize {
 	private calculateGlobalPositions() {
 		GameBoard.cellsByBlocksGlobalPositions.length = 0;
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
-			let blockContainer = this.blocks[colorIndex];
+			const blockContainer = this.blocks[colorIndex];
 			// Calculate every position of every cell
 			for (let p = 0; p < 24; p++) {
-				let fake = new PIXI.Graphics();
+				const fake = new PIXI.Graphics();
 				fake.beginFill(0x0, 1);
 				fake.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
 				fake.endFill();
@@ -1082,11 +1082,11 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		// Homes locations
 		GameBoard.homeGlobalPositions.length = 0;
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
-			let blockContainer = this.blocks[colorIndex];
+			const blockContainer = this.blocks[colorIndex];
 			// For every color initiate homes
 			GameBoard.homeGlobalPositions.push(new Array<PIXI.Point>());
 			for (let piecePerColorIndex = 0; piecePerColorIndex < PIECES_PER_COLOR; piecePerColorIndex++) {
-				let homeGraphicsCell = new PIXI.Graphics();
+				const homeGraphicsCell = new PIXI.Graphics();
 				homeGraphicsCell.beginFill(playerColors[colorIndex], 0);
 				homeGraphicsCell.lineStyle(D.CELL_HEIGHT * 0.1, playerColors[colorIndex], 0.1);
 				homeGraphicsCell.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
@@ -1101,11 +1101,11 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		// Goals locations
 		GameBoard.goalGlobalPositions.length = 0;
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
-			let blockContainer = this.blocks[colorIndex];
+			const blockContainer = this.blocks[colorIndex];
 			GameBoard.goalGlobalPositions.push(new Array<PIXI.Point>());
 			// For every color initiate goals
 			for (let piecePerColorIndex = 0; piecePerColorIndex < PIECES_PER_COLOR; piecePerColorIndex++) {
-				let goalGraphicsCell = new PIXI.Graphics();
+				const goalGraphicsCell = new PIXI.Graphics();
 				goalGraphicsCell.beginFill(playerColors[colorIndex], 0);
 				goalGraphicsCell.lineStyle(D.CELL_HEIGHT * 0.1, playerColors[colorIndex], 0.1);
 				goalGraphicsCell.drawCircle(0, 0, D.CELL_HEIGHT * 0.4);
@@ -1129,11 +1129,11 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		// Dice locations. Two per each color
 		GameBoard.dicesGlobalPositions.length = 0;
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
-			let blockContainer = this.blocks[colorIndex];
+			const blockContainer = this.blocks[colorIndex];
 			GameBoard.dicesGlobalPositions.push(new Array<PIXI.Point>());
 			for (let diceIndex = 0; diceIndex < 2; diceIndex++) {
 				// (Here we determine locations per each block)
-				let diceGraphicsCell = new PIXI.Graphics();
+				const diceGraphicsCell = new PIXI.Graphics();
 				diceGraphicsCell.beginFill(playerColors[colorIndex], 1);
 				diceGraphicsCell.drawRoundedRect(0, 0, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, 8);
 				diceGraphicsCell.endFill();
@@ -1148,8 +1148,8 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		// Skip location
 		GameBoard.skipGlobalPositions.length = 0;
 		for (let colorIndex = 0; colorIndex < this.blocks.length; colorIndex++) {
-			let blockContainer = this.blocks[colorIndex];
-			let skipGraphicsCell = new PIXI.Graphics();
+			const blockContainer = this.blocks[colorIndex];
+			const skipGraphicsCell = new PIXI.Graphics();
 			skipGraphicsCell.beginFill(playerColors[colorIndex], 0.2);
 			skipGraphicsCell.drawRoundedRect(0, 0, D.CELL_HEIGHT * 4 + D.CELL_HEIGHT / 2, D.CELL_HEIGHT, 8);
 			skipGraphicsCell.endFill();
@@ -1188,7 +1188,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 	}
 
 	public useDiceAtSelectedPieceIfAllowed(dice: Dice): MoveResult {
-		let moveResult = this._useDiceAtSelectedPieceIfAllowed(this.pieceSelected, dice, true);
+		const moveResult = this._useDiceAtSelectedPieceIfAllowed(this.pieceSelected, dice, true);
 		if (moveResult.success) {
 			if (moveResult.bonus > 0) {
 				this.sounds.playSound('bonus');
@@ -1293,7 +1293,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	private getAmountOfPlayers(): number {
 		let amount = 0;
-		for (let e of this.playersByColor) {
+		for (const e of this.playersByColor) {
 			if (e) {
 				amount++;
 			}
@@ -1405,7 +1405,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		if (pieceToMove.pathIndex == -1 && newPathIndex != 0) {
 			return { success: false, bonus: 0 };
 		}
-		let occupiedBy = this.getPieceOnPath(pieceToMove.colorIndex, newPathIndex);
+		const occupiedBy = this.getPieceOnPath(pieceToMove.colorIndex, newPathIndex);
 		if (occupiedBy == null) {
 			if (performTheMove) {
 				pieceToMove.pathIndex = newPathIndex;
@@ -1445,13 +1445,13 @@ export class GameBoard extends GameBoardBase implements OnResize {
 	// Get piece on the local color's path. Returns null if not
 	// occupied
 	private getPieceOnPath(colorIndex: number, pathIndex: number): Piece | null {
-		let globalCellIndex = GameBoard.getGlobalCellIndex(colorIndex, pathIndex);
+		const globalCellIndex = GameBoard.getGlobalCellIndex(colorIndex, pathIndex);
 		if (globalCellIndex < 0) {
 			return null;
 		}
 		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
 			for (let i = 0; i < PIECES_PER_COLOR; i++) {
-				let pieceGlobalCellIndex = GameBoard.getGlobalCellIndex(colorIndex, this.pieces[colorIndex][i].pathIndex);
+				const pieceGlobalCellIndex = GameBoard.getGlobalCellIndex(colorIndex, this.pieces[colorIndex][i].pathIndex);
 				if (pieceGlobalCellIndex == globalCellIndex) {
 					return this.pieces[colorIndex][i];
 				}
@@ -1462,7 +1462,7 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	//============PUBLIC=================================================================
 	// TODO: Move out stuff that doesn't need to always update
-	public update(delta: number) {
+	public update(_delta: number) {
 		super.update(delta);
 		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
 			for (let i = 0; i < PIECES_PER_COLOR; i++) {
@@ -1492,21 +1492,21 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		}
 		this.skip.onResize(flag);
 
-		let viewportSize = D.getViewportSize(this.renderer);
+		const viewportSize = D.getViewportSize(this.renderer);
 
-		let graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
+		const graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
 		graphics.clear();
-		let color = Color.rgb(hex2string(regularCellColor));
+		const color = Color.rgb(hex2string(regularCellColor));
 		graphics.beginFill(color.rgbNumber(), 0.5);
-		let width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
+		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
 		graphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
 		graphics.endFill();
 
 		this.startGameButton.position.set(viewportSize.x / 2, viewportSize.y / 2);
 
-		let text = <PIXI.Sprite>this.startGameButton.getChildAt(1);
-		let imageAlias = "again";
-		let ratio = WH_IMAGE_RATIO[imageAlias];
+		const text = <PIXI.Sprite>this.startGameButton.getChildAt(1);
+		const imageAlias = "again";
+		const ratio = WH_IMAGE_RATIO[imageAlias];
 		text.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 		text.width = width * 0.7;
 		text.height = text.width / ratio;
@@ -1557,7 +1557,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		for (let i = 0; i < 4; i++) {
 			this.playersByColor.push(false);
 
-			let button = new class extends ButtonBehaviorContainer {
+			const button = new class extends ButtonBehaviorContainer {
 				board: GameBoardMenu;
 
 				constructor(board: GameBoardMenu) {
@@ -1582,7 +1582,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 
 			}(this);
 			this.playerSelectionButtons.push(button);
-			let graphics = new PIXI.Graphics();
+			const graphics = new PIXI.Graphics();
 			button.addChild(graphics);
 			this.addChild(button);
 		}
@@ -1642,14 +1642,14 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 	public onResize(flag: OnResizeFlag): void {
 		super.onResize(flag);
 
-		let viewportSize = D.getViewportSize(this.renderer);
+		const viewportSize = D.getViewportSize(this.renderer);
 
 		if (flag & OnResizeFlag.SIZE) {
 			for (let i = 0; i < this.playerSelectionButtons.length; i++) {
-				let matrix = new PIXI.Matrix();
+				const matrix = new PIXI.Matrix();
 				matrix.tx = viewportSize.x / 2;
 				matrix.ty = viewportSize.y / 2;
-				let diffM = new PIXI.Matrix();
+				const diffM = new PIXI.Matrix();
 				diffM.tx = -D.CELL_WIDTH * 1.5;
 				diffM.ty = D.CELL_WIDTH * 1.5;
 				diffM.rotate(-i * Math.PI / 2);
@@ -1661,10 +1661,10 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		}
 
 		for (let i = 0; i < this.playerSelectionButtons.length; i++) {
-			let graphics = <PIXI.Graphics>this.playerSelectionButtons[i].getChildAt(0);
+			const graphics = <PIXI.Graphics>this.playerSelectionButtons[i].getChildAt(0);
 			graphics.clear();
 
-			let color = Color.rgb(hex2string(playerColors[i]));
+			const color = Color.rgb(hex2string(playerColors[i]));
 
 			let alpha = 0.25;
 			if (this.playersByColor[i]) {
@@ -1672,21 +1672,21 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 				alpha = 0.8;
 			}
 			graphics.beginFill(color.rgbNumber(), alpha);
-			let width = D.CELL_WIDTH * 3;
-			let height = D.CELL_HEIGHT * 7;
+			const width = D.CELL_WIDTH * 3;
+			const height = D.CELL_HEIGHT * 7;
 			graphics.blendMode = 'exclusion';
 			graphics.pivot.set(0, 0);
 			graphics.position.set(0, 0);
-			let overlappingBorder = D.CELL_HEIGHT / 2;
+			const overlappingBorder = D.CELL_HEIGHT / 2;
 			graphics.drawRoundedRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, overlappingBorder);
 
 			graphics.endFill();
 		}
 
 		this.startGameButtonGraphics.clear();
-		let color = Color.rgb(hex2string(regularCellColor));
+		const color = Color.rgb(hex2string(regularCellColor));
 		this.startGameButtonGraphics.beginFill(color.rgbNumber(), 1);
-		let width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
+		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
 		this.startGameButtonGraphics.drawRoundedRect(-width / 2, -width / 2, width, width, D.CELL_HEIGHT);
 		this.startGameButtonGraphics.endFill();
 
@@ -1700,8 +1700,8 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		// // GOTCHA: Parent's scale makes child scale smaller correspondingly
 		// this.cog.getChildAt(0).hitArea = new PIXI.Ellipse(0,0,(width / 5) / this.cog.scale.x, (width / 5) / this.cog.scale.y)
 
-		let imageAlias = this.isReadyToStart() ? "start" : "select";
-		let ratio = WH_IMAGE_RATIO[imageAlias];
+		const imageAlias = this.isReadyToStart() ? "start" : "select";
+		const ratio = WH_IMAGE_RATIO[imageAlias];
 		this.startGameButtonText.texture = PIXI.Texture.from(IMAGE_ALIASES[imageAlias]);
 
 		this.startGameButtonText.width = width * 0.8;
@@ -1711,7 +1711,7 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 	}
 
 	// TODO: Move out stuff that doesn't need to always update
-	update(delta: number) {
+	update(_delta: number) {
 		super.update(delta);
 	}
 
@@ -1813,7 +1813,7 @@ export class Cog extends PIXI.Container implements OnResize {
 	}
 
 	getCogWidth(): number {
-		let viewportSize = D.getViewportSize(this.renderer);
+		const viewportSize = D.getViewportSize(this.renderer);
 		return Math.min(viewportSize.x / 16, viewportSize.y / 16);
 		//return (D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP*2) / 2
 	}
@@ -1823,16 +1823,16 @@ export class Cog extends PIXI.Container implements OnResize {
 	}
 
 	onResize(flag: OnResizeFlag): void {
-		let viewportSize = D.getViewportSize(this.renderer);
+		const viewportSize = D.getViewportSize(this.renderer);
 
 		this.menu.onResize(flag);
 
-		let width = this.getCogWidth();
-		let height = width / WH_IMAGE_RATIO["cog"];
+		const width = this.getCogWidth();
+		const height = width / WH_IMAGE_RATIO["cog"];
 		this.cogSprite.width = width;
 		this.cogSprite.height = height;
 
-		let cogGap = this.getCogGap();
+		const cogGap = this.getCogGap();
 
 		this.cogSprite.position.set(viewportSize.x - this.cogSprite.width / 2 - cogGap, this.cogSprite.height / 2 + cogGap);
 
@@ -1886,9 +1886,9 @@ export class Menu extends PIXI.Container implements OnResize {
 	}
 
 	onResize(flag: OnResizeFlag): void {
-		let viewportSize = D.getViewportSize(this.cog.renderer);
+		const viewportSize = D.getViewportSize(this.cog.renderer);
 
-		let bgGap = D.CELL_HEIGHT / 4;
+		const bgGap = D.CELL_HEIGHT / 4;
 		this.graphics.clear();
 		this.graphics.beginFill(Color.rgb('rgb(134,134,134)').rgbNumber(), 0.5);
 		this.graphics.drawRoundedRect(bgGap, bgGap,
@@ -1896,9 +1896,9 @@ export class Menu extends PIXI.Container implements OnResize {
 			viewportSize.y - bgGap * 2, bgGap * 2);
 		this.graphics.endFill();
 		// this.graphics.beginHole(); // TODO(next)
-		let width = this.cog.getCogWidth();
-		let height = width / WH_IMAGE_RATIO["cog"];
-		let gap = this.cog.getCogGap();
+		const width = this.cog.getCogWidth();
+		const height = width / WH_IMAGE_RATIO["cog"];
+		const gap = this.cog.getCogGap();
 		this.graphics.drawEllipse(viewportSize.x - width / 2 - gap, gap + height / 2, (width / 2) * 1.5, (height / 2) * 1.5);
 		// this.graphics.endHole(); // TODO(next)
 		this.graphics.cut();
@@ -1953,24 +1953,24 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.onResize(OnResizeFlag.ALL);
 	}
 
-	onResize(flag: OnResizeFlag): void {
-		let viewportSize = D.getViewportSize(this.menu.cog.renderer);
+	onResize(_flag: OnResizeFlag): void {
+		const viewportSize = D.getViewportSize(this.menu.cog.renderer);
 		this.graphics.clear();
 		this.graphics.beginFill(settingsButtonsColor, 1);
-		let width = this.menu.cog.getCogWidth();
-		let gap = this.menu.cog.getCogGap();
+		const width = this.menu.cog.getCogWidth();
+		const gap = this.menu.cog.getCogGap();
 
-		let buttonH = width;
+		const buttonH = width;
 
-		let ratio = WH_IMAGE_RATIO["settings-restart"];
+		const ratio = WH_IMAGE_RATIO["settings-restart"];
 
 		// ratio = w / h
-		let factor = 0.7;
-		let fontW = ratio * (buttonH * factor);
-		let fontH = buttonH * factor;
+		const factor = 0.7;
+		const fontW = ratio * (buttonH * factor);
+		const fontH = buttonH * factor;
 		this.sprite.width = fontW;
 		this.sprite.height = fontH;
-		let buttonW = fontW / factor;
+		const buttonW = fontW / factor;
 		this.sprite.position.set(viewportSize.x - width - gap * 2 - fontW - (buttonW - fontW) / 2, gap + (buttonH - fontH) / 2);
 
 

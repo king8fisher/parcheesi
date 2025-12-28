@@ -1,9 +1,7 @@
 import * as PIXI from 'pixi.js';
 
-import { bgColor } from "./constants";
 import { GameBoard, GameBoardMenu, OnResizeFlag } from "./parcheesi";
 import { initSounds, Sounds } from "./sounds";
-import { settings } from "@pixi/core";
 
 export enum ResolutionChangeBehavior {
 	KeepBuiltIn = 0,
@@ -87,14 +85,14 @@ export const loadParcheesiGame = async (app: PIXI.Application) => {
 //renderer.plugins.interaction.autoPreventDefault = false
 
 const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds) => {
-	let ticker = new PIXI.Ticker();
+	const ticker = new PIXI.Ticker();
 
 	let accumulatedPlayersByColor = new Array<boolean>();
 	for (let i = 0; i < 4; i++) {
 		accumulatedPlayersByColor.push(false);
 	}
 
-	let gameFinishedRestartClick = (playersByColor: Array<boolean>) => {
+	const gameFinishedRestartClick = (playersByColor: Array<boolean>) => {
 		accumulatedPlayersByColor = playersByColor;
 		menu.visible = true;
 		if (game != null) {
@@ -102,7 +100,7 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		}
 	};
 
-	let amountOfPlayers = function (a: Array<boolean>): number {
+	const _amountOfPlayers = function (a: Array<boolean>): number {
 		let result = 0;
 		for (let i = 0; i < a.length; i++) {
 			if (a[i]) {
@@ -112,13 +110,13 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		return result;
 	};
 
-	let menu = new GameBoardMenu(app.renderer, /*loader, */accumulatedPlayersByColor,
+	const menu = new GameBoardMenu(app.renderer, /*loader, */accumulatedPlayersByColor,
 		(playersByColor: Array<boolean>) => {
 			//setPiecesPerColor(amountOfPlayers(playersByColor) <= 2 ? 5 : 4)
 			accumulatedPlayersByColor = playersByColor;
 			menu.visible = false;
-			let prevGame = game;
-			let newGame = new GameBoard(app.renderer, /*loader, */accumulatedPlayersByColor, gameFinishedRestartClick, (playersByColor: Array<boolean>) => {
+			const prevGame = game;
+			const newGame = new GameBoard(app.renderer, /*loader, */accumulatedPlayersByColor, gameFinishedRestartClick, (playersByColor: Array<boolean>) => {
 				gameFinishedRestartClick(playersByColor);
 			}, sounds);
 			stage.addChild(newGame);
@@ -155,15 +153,15 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 	let savedHeight: number;
 	let savedOrientation: string;
 
-	let onResize = (event: UIEvent | null) => {
+	const onResize = (_event: UIEvent | null) => {
 		// let iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 		// let iw = (iOS) ? screen.width : window.innerWidth
 		// let ih = (iOS) ? screen.height : window.innerHeight
-		let newResolution = window.devicePixelRatio;
-		let newWidth = document.body.clientWidth; // window.innerWidth
-		let newHeight = document.body.clientHeight; //window.innerHeight
-		let newOrientation = (screen.orientation || {}).type || (<any>screen).mozOrientation || (<any>screen).msOrientation;
-		let changed = (newResolution != savedResolution)
+		const newResolution = window.devicePixelRatio;
+		const newWidth = document.body.clientWidth; // window.innerWidth
+		const newHeight = document.body.clientHeight; //window.innerHeight
+		const newOrientation = (screen.orientation || {}).type || (screen as unknown as { mozOrientation?: string }).mozOrientation || (screen as unknown as { msOrientation?: string }).msOrientation;
+		const changed = (newResolution != savedResolution)
 			|| (newWidth != savedWidth)
 			|| (newHeight != savedHeight)
 			|| (newOrientation != savedOrientation);
@@ -223,7 +221,7 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 	// }
 
 	if (window.DeviceOrientationEvent) {
-		window.addEventListener("deviceorientation", (e) => { onResize(null); }, false);
+		window.addEventListener("deviceorientation", (_e) => { onResize(null); }, false);
 	}
 
 	//console.log(PIXI.utils.TextureCache)

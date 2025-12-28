@@ -1,11 +1,8 @@
 "use client";
 
-import { backgroundBoxColor } from "@/app/constants";
 import { loadParcheesiGame } from "@/app/main";
 import { useOnce } from "@/hooks/useOnce";
-import { settings } from "@pixi/core";
-import Color from "color";
-import { Application, Assets, Sprite } from "pixi.js";
+import { Application } from "pixi.js";
 import { useEffect, useRef } from "react";
 
 
