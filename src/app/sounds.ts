@@ -13,13 +13,21 @@ export const initSounds = (): Sounds => {
   // ------------ sounds ----------------------------------------
   const sounds: Record<string, Howl> = {};
   const GLOBAL_VOLUME = 0.5;
-  let CURRENT_VOLUME = 0;
+  let CURRENT_VOLUME = 0; // Start with sound disabled
+  let audioContextUnlocked = false;
 
   Howler.autoUnlock = false;
-  // Initially we always mute
+  // Initially we always mute (will be unmuted on first user interaction)
   Howler.volume(0);
 
   function unmuteIfVolumeUp() {
+    // On mobile, the AudioContext must be resumed during a user gesture
+    if (!audioContextUnlocked && Howler.ctx && Howler.ctx.state === 'suspended') {
+      Howler.ctx.resume().then(() => {
+        audioContextUnlocked = true;
+      }).catch(() => {});
+    }
+    audioContextUnlocked = true;
     Howler.volume(CURRENT_VOLUME);
   }
 
