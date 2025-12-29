@@ -16,8 +16,9 @@ export const initSounds = (): Sounds => {
   let CURRENT_VOLUME = 0; // Start with sound disabled
   let audioContextUnlocked = false;
 
-  Howler.autoUnlock = false;
-  // Initially we always mute (will be unmuted on first user interaction)
+  // Let Howler handle unlocking audio on first user interaction (required for mobile)
+  Howler.autoUnlock = true;
+  // Initially we always mute (will be unmuted when user enables sound)
   Howler.volume(0);
 
   function unmuteIfVolumeUp() {
@@ -40,33 +41,34 @@ export const initSounds = (): Sounds => {
     return CURRENT_VOLUME == 0;
   }
 
+  // MP3 first for iOS Safari compatibility (doesn't support webm)
   const DICE_SOUND_COUNT = 29;
   for (let i = 0; i < DICE_SOUND_COUNT; i++) {
-    loadSound(`dice-${i}`, [`/sounds/dice/dice-${i}.webm`, `/sounds/dice/dice-${i}.mp3`], 0.3);
+    loadSound(`dice-${i}`, [`/sounds/dice/dice-${i}.mp3`, `/sounds/dice/dice-${i}.webm`], 0.3);
   }
 
   const PIECE_SOUND_COUNT = 8;
   for (let i = 0; i < PIECE_SOUND_COUNT; i++) {
-    loadSound(`piece-${i}`, [`/sounds/piece/piece-${i}.webm`, `/sounds/piece/piece-${i}.mp3`], 0.5);
+    loadSound(`piece-${i}`, [`/sounds/piece/piece-${i}.mp3`, `/sounds/piece/piece-${i}.webm`], 0.5);
   }
-  loadSound('wrong', ['/sounds/wrong.webm', '/sounds/wrong.mp3'], 0.5);
-  loadSound('tada', ['/sounds/tada.webm', '/sounds/tada.mp3'], 0.8);
-  loadSound('bonus', ['/sounds/bonus.webm', '/sounds/bonus.mp3'], 0.5);
-  loadSound('sweep', ['/sounds/sweep.webm', '/sounds/sweep.mp3'], 0.3);
-  loadSound('click', ['/sounds/click.webm', '/sounds/click.mp3'], 0.3);
-  loadSound('select', ['/sounds/select.webm', '/sounds/select.mp3'], 0.3);
+  loadSound('wrong', ['/sounds/wrong.mp3', '/sounds/wrong.webm'], 0.5);
+  loadSound('tada', ['/sounds/tada.mp3', '/sounds/tada.webm'], 0.8);
+  loadSound('bonus', ['/sounds/bonus.mp3', '/sounds/bonus.webm'], 0.5);
+  loadSound('sweep', ['/sounds/sweep.mp3', '/sounds/sweep.webm'], 0.3);
+  loadSound('click', ['/sounds/click.mp3', '/sounds/click.webm'], 0.3);
+  loadSound('select', ['/sounds/select.mp3', '/sounds/select.webm'], 0.3);
 
   function loadSound(name: string, url: string | string[], volume: number) {
-    //loader.add('tada', '/sounds/tada.mp3')
     const s = new Howl({
       autoplay: false,
       src: url,
       preload: true,
       loop: false,
       volume: volume,
+      html5: true, // Required for iOS Safari compatibility
       onplayerror: function () {
         if (Howler.volume() > 0) {
-          if (Howler.ctx.state == "suspended") {
+          if (Howler.ctx && Howler.ctx.state == "suspended") {
             Howler.ctx.resume().then(
               () => {
                 s.play();

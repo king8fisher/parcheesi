@@ -26,6 +26,10 @@ html, body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Prevent Safari from showing text input UI */
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: default;
 }
 
 /* Prevent text selection and callouts on mobile */
