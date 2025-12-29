@@ -7,3 +7,28 @@
     text-wrap: balance;
   }
 }
+
+/* Mobile viewport fixes */
+html, body {
+  /* Prevent pull-to-refresh and bounce scrolling on iOS */
+  overscroll-behavior: none;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  /* Use dvh for dynamic viewport height (accounts for mobile browser chrome) */
+  height: 100dvh;
+  touch-action: manipulation;
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Prevent text selection and callouts on mobile */
+canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

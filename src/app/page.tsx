@@ -12,8 +12,8 @@ const GameCanvasNoSSR = dynamic(() => import('../components/GameCanvas'),
 
 export default function Home() {
   return (
-    <main className="h-screen w-screen overflow-clip flex flex-col bg-transparent ">
-      <div className="grow">
+    <main className="h-dvh w-screen overflow-hidden flex flex-col bg-transparent">
+      <div className="grow min-h-0">
         <GameCanvasNoSSR />
       </div>
     </main>

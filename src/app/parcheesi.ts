@@ -1876,6 +1876,14 @@ export class Cog extends PIXI.Container implements OnResize {
 		// Icon will update via fullscreenchange event listener
 	}
 
+	isFullscreenSupported(): boolean {
+		// Check if Fullscreen API is available (not supported on iOS Safari)
+		return !!(
+			document.documentElement.requestFullscreen ||
+			(document.documentElement as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen
+		) && document.fullscreenEnabled !== false;
+	}
+
 	setupFullscreenListener() {
 		document.addEventListener('fullscreenchange', () => {
 			this.onResize(OnResizeFlag.DRAW);
@@ -1931,20 +1939,26 @@ export class Cog extends PIXI.Container implements OnResize {
 			(this.muteSprite.height / 2) / this.muteSprite.scale.y);
 
 		// Fullscreen icon (using Phosphor icons) - bottom right corner
-		const isFullscreen = !!document.fullscreenElement;
-		this.fullscreenSprite.texture = isFullscreen
-			? PIXI.Texture.from(IMAGE_ALIASES["fullscreen-exit"])
-			: PIXI.Texture.from(IMAGE_ALIASES["fullscreen-enter"]);
-		this.fullscreenSprite.width = width;
-		this.fullscreenSprite.height = width;
-		this.fullscreenSprite.position.set(
-			viewportSize.x - cogGap - width / 2,
-			viewportSize.y - cogGap - width / 2
-		);
+		// Only show if Fullscreen API is supported (not on iOS)
+		if (this.isFullscreenSupported()) {
+			this.fullscreenSprite.visible = true;
+			const isFullscreen = !!document.fullscreenElement;
+			this.fullscreenSprite.texture = isFullscreen
+				? PIXI.Texture.from(IMAGE_ALIASES["fullscreen-exit"])
+				: PIXI.Texture.from(IMAGE_ALIASES["fullscreen-enter"]);
+			this.fullscreenSprite.width = width;
+			this.fullscreenSprite.height = width;
+			this.fullscreenSprite.position.set(
+				viewportSize.x - cogGap - width / 2,
+				viewportSize.y - cogGap - width / 2
+			);
 
-		this.fullscreenSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
-			(this.fullscreenSprite.width / 2) / this.fullscreenSprite.scale.x,
-			(this.fullscreenSprite.height / 2) / this.fullscreenSprite.scale.y);
+			this.fullscreenSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
+				(this.fullscreenSprite.width / 2) / this.fullscreenSprite.scale.x,
+				(this.fullscreenSprite.height / 2) / this.fullscreenSprite.scale.y);
+		} else {
+			this.fullscreenSprite.visible = false;
+		}
 
 		if (this.menu.visible) {
 			this.gameBoardBase.filter([new PIXI.BlurFilter({ strength: 5, quality: 10 })]);
