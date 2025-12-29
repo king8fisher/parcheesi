@@ -10,6 +10,8 @@
 
 /* Mobile viewport fixes */
 html, body {
+  /* Black background to prevent white flash */
+  background-color: #000;
   /* Prevent pull-to-refresh and bounce scrolling on iOS */
   overscroll-behavior: none;
   overflow: hidden;
