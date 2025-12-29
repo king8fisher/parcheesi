@@ -1756,6 +1756,7 @@ export class Cog extends PIXI.Container implements OnResize {
 
 	cogSprite: PIXI.Sprite;
 	muteSprite: PIXI.Sprite;
+	fullscreenSprite: PIXI.Sprite;
 
 	renderer: PIXI.Renderer;
 	gameBoardBase: GameBoardBase;
@@ -1829,7 +1830,56 @@ export class Cog extends PIXI.Container implements OnResize {
 
 		}(this));
 
+		// Fullscreen toggle button
+		this.fullscreenSprite = new PIXI.Sprite();
+		this.fullscreenSprite.anchor.set(0.5, 0.5);
+		this.fullscreenSprite.alpha = 0.8;
+		this.addChild(this.fullscreenSprite);
+		this.fullscreenSprite.addChild(new class extends ButtonBehaviorContainer {
+			owner: Cog;
+
+			constructor(owner: Cog) {
+				super(gameBoardBase.sounds);
+				this.owner = owner;
+				this.hoverChanged();
+			}
+
+			clickHappened(): void {
+				this.owner.toggleFullscreen();
+				gameBoardBase.sounds.playSound("click", true);
+			}
+
+			hoverChanged(): void {
+				this.owner.fullscreenSprite.alpha = this.isHovered() ? 1 : 0.8;
+			}
+
+			isAllowedToClick(): boolean {
+				return true;
+			}
+
+		}(this));
+
+		this.setupFullscreenListener();
 		this.onResize(OnResizeFlag.ALL);
+	}
+
+	toggleFullscreen() {
+		if (!document.fullscreenElement) {
+			document.documentElement.requestFullscreen().catch(() => {
+				// Fullscreen request failed (e.g., not triggered by user gesture)
+			});
+		} else {
+			document.exitFullscreen().catch(() => {
+				// Exit fullscreen failed
+			});
+		}
+		// Icon will update via fullscreenchange event listener
+	}
+
+	setupFullscreenListener() {
+		document.addEventListener('fullscreenchange', () => {
+			this.onResize(OnResizeFlag.DRAW);
+		});
 	}
 
 	toggleMenuVisibility() {
@@ -1879,6 +1929,22 @@ export class Cog extends PIXI.Container implements OnResize {
 		this.muteSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
 			(this.muteSprite.width / 2) / this.muteSprite.scale.x,
 			(this.muteSprite.height / 2) / this.muteSprite.scale.y);
+
+		// Fullscreen icon (using Phosphor icons) - bottom right corner
+		const isFullscreen = !!document.fullscreenElement;
+		this.fullscreenSprite.texture = isFullscreen
+			? PIXI.Texture.from(IMAGE_ALIASES["fullscreen-exit"])
+			: PIXI.Texture.from(IMAGE_ALIASES["fullscreen-enter"]);
+		this.fullscreenSprite.width = width;
+		this.fullscreenSprite.height = width;
+		this.fullscreenSprite.position.set(
+			viewportSize.x - cogGap - width / 2,
+			viewportSize.y - cogGap - width / 2
+		);
+
+		this.fullscreenSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
+			(this.fullscreenSprite.width / 2) / this.fullscreenSprite.scale.x,
+			(this.fullscreenSprite.height / 2) / this.fullscreenSprite.scale.y);
 
 		if (this.menu.visible) {
 			this.gameBoardBase.filter([new PIXI.BlurFilter({ strength: 5, quality: 10 })]);

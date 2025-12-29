@@ -16,6 +16,8 @@ export const IMAGE_ALIASES: Record<string, string> = {
 	"settings-restart": "/images/Restart.png",
 	"sound-off": "/images/sound-off.png",
 	"sound-on": "/images/sound-on.png",
+	"fullscreen-enter": "/images/fullscreen-enter.svg",
+	"fullscreen-exit": "/images/fullscreen-exit.svg",
 };
 // Images are exported with PW2 dimensions (1,2,4,8,16,32,64,128,256,512,1024,2048),
 // however in the editor we can read the real size of the portion,
