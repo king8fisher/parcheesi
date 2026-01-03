@@ -140,9 +140,16 @@ export class CellGraphics extends PIXI.Graphics implements OnResize {
 		}
 
 		// Create subtle gradient for cells for a more polished look
-		const cellGradient = new PIXI.FillGradient(0, 0, D.CELL_WIDTH, D.CELL_HEIGHT);
-		cellGradient.addColorStop(0, lighten(fillColor, 0.06));
-		cellGradient.addColorStop(1, fillColor);
+		const cellGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0, y: 0 },
+			end: { x: 1, y: 1 },
+			colorStops: [
+				{ offset: 0, color: lighten(fillColor, 0.06) },
+				{ offset: 1, color: fillColor },
+			],
+			textureSpace: 'local',
+		});
 
 		// Smoother radius for cells
 		const smoothRadius = D.CELL_RADIUS * 1.5;
@@ -567,9 +574,16 @@ export class Dice extends PIXI.Container implements OnResize {
 			const diceRadius = D.CELL_HEIGHT / 1.6;
 
 			// Create gradient for dice click overlay
-			const diceGradient = new PIXI.FillGradient(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT, D.CELL_HEIGHT);
-			diceGradient.addColorStop(0, lighten(playerColors[colorIndex], 0.15));
-			diceGradient.addColorStop(1, playerColors[colorIndex]);
+			const diceGradient = new PIXI.FillGradient({
+				type: 'linear',
+				start: { x: 0, y: 0 },
+				end: { x: 1, y: 1 },
+				colorStops: [
+					{ offset: 0, color: lighten(playerColors[colorIndex], 0.15) },
+					{ offset: 1, color: playerColors[colorIndex] },
+				],
+				textureSpace: 'local',
+			});
 
 			this.overlay.roundRect(-D.CELL_HEIGHT, -D.CELL_HEIGHT, D.CELL_HEIGHT * 2, D.CELL_HEIGHT * 2, diceRadius)
 				.fill(diceGradient)
@@ -643,7 +657,7 @@ export class Skip extends PIXI.Container implements OnResize {
 		this.button.hitArea = new PIXI.Rectangle(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT);
 		this.addChild(this.button);
 
-		const text = PIXI.Sprite.from(IMAGE_ALIASES["skip"]);
+		const text = new PIXI.Sprite(PIXI.Texture.from(IMAGE_ALIASES["skip"]));
 		text.anchor.set(0.5, 0.5);
 		this.button.addChild(text);
 
@@ -673,9 +687,16 @@ export class Skip extends PIXI.Container implements OnResize {
 			const skipRadius = D.CELL_HEIGHT / 3;
 
 			// Create gradient for skip button
-			const skipGradient = new PIXI.FillGradient(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH / 2, D.CELL_HEIGHT / 2);
-			skipGradient.addColorStop(0, lighten(playerColors[colorIndex], 0.1));
-			skipGradient.addColorStop(1, playerColors[colorIndex]);
+			const skipGradient = new PIXI.FillGradient({
+				type: 'linear',
+				start: { x: 0, y: 0 },
+				end: { x: 1, y: 1 },
+				colorStops: [
+					{ offset: 0, color: lighten(playerColors[colorIndex], 0.1) },
+					{ offset: 1, color: playerColors[colorIndex] },
+				],
+				textureSpace: 'local',
+			});
 
 			this.overlay.roundRect(-D.CELL_WIDTH / 2, -D.CELL_HEIGHT / 2, D.CELL_WIDTH, D.CELL_HEIGHT, skipRadius)
 				.fill(skipGradient);
@@ -706,10 +727,17 @@ export class Background extends PIXI.Graphics implements OnResize {
 		const size = D.getViewportSize(this.renderer);
 		const radius = bgGap * 2.5;
 
-		// Create a subtle radial gradient for the background
-		const gradientFill = new PIXI.FillGradient(size.x / 2, size.y / 2, size.x / 2, Math.max(size.x, size.y) * 0.7);
-		gradientFill.addColorStop(0, lighten(backgroundBoxColor, 0.08));
-		gradientFill.addColorStop(1, backgroundBoxColor);
+		// Create a subtle gradient for the background
+		const gradientFill = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0.5, y: 0 },
+			end: { x: 0.5, y: 1 },
+			colorStops: [
+				{ offset: 0, color: lighten(backgroundBoxColor, 0.08) },
+				{ offset: 1, color: backgroundBoxColor },
+			],
+			textureSpace: 'local',
+		});
 
 		this.roundRect(bgGap, bgGap,
 			size.x - bgGap * 2,
@@ -779,10 +807,17 @@ export class Highlighter extends PIXI.Graphics implements OnResize {
 		const smoothRadius = D.CELL_RADIUS * 1.5;
 
 		// Create gradient for the turn highlighter
-		const highlightGradient = new PIXI.FillGradient(0, 0, highlightWidth, 0);
-		highlightGradient.addColorStop(0, lighten(playerColors[this.colorIndex], 0.15));
-		highlightGradient.addColorStop(0.5, playerColors[this.colorIndex]);
-		highlightGradient.addColorStop(1, lighten(playerColors[this.colorIndex], 0.15));
+		const highlightGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0, y: 0.5 },
+			end: { x: 1, y: 0.5 },
+			colorStops: [
+				{ offset: 0, color: lighten(playerColors[this.colorIndex], 0.15) },
+				{ offset: 0.5, color: playerColors[this.colorIndex] },
+				{ offset: 1, color: lighten(playerColors[this.colorIndex], 0.15) },
+			],
+			textureSpace: 'local',
+		});
 
 		this.roundRect(D.CELL_GAP / 2, D.CELL_GAP / 2, highlightWidth, highlightHeight, smoothRadius)
 			.fill(highlightGradient);
@@ -1072,15 +1107,16 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 		const graphics = new PIXI.Graphics();
 		this.startGameButton.addChild(graphics);
-		this.addChild(this.startGameButton);
 
-		const text = PIXI.Sprite.from(IMAGE_ALIASES["again"]);
+		const text = new PIXI.Sprite(PIXI.Texture.from(IMAGE_ALIASES["again"]));
 		text.anchor.set(0.5, 0.5);
 		this.startGameButton.addChild(text);
-		this.addChild(this.startGameButton);
 
 		// Setup fuzzy hit detection (must be before cog so cog stays on top)
 		this.setupFuzzyHitDetection();
+
+		// Add startGameButton after hitInterceptor so it receives clicks
+		this.addChild(this.startGameButton);
 
 		this.cog = new Cog(this);
 		this.addChild(this.cog);
@@ -1641,9 +1677,16 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		const buttonRadius = D.CELL_HEIGHT * 1.2;
 
 		// Create a subtle gradient for the restart button
-		const buttonGradient = new PIXI.FillGradient(-width / 2, -width / 2, width / 2, width / 2);
-		buttonGradient.addColorStop(0, lighten(regularCellColor, 0.12));
-		buttonGradient.addColorStop(1, mix(regularCellColor, 0x000000, 0.1));
+		const buttonGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0, y: 0 },
+			end: { x: 1, y: 1 },
+			colorStops: [
+				{ offset: 0, color: lighten(regularCellColor, 0.12) },
+				{ offset: 1, color: mix(regularCellColor, 0x000000, 0.1) },
+			],
+			textureSpace: 'local',
+		});
 
 		graphics.roundRect(-width / 2, -width / 2, width, width, buttonRadius)
 			.fill({ fill: buttonGradient, alpha: 0.6 });
@@ -1823,11 +1866,18 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 			const radius = overlappingBorder * 1.2;
 
 			// Create gradient for player selection overlay
-			const gradientFill = new PIXI.FillGradient(0, 0, width, height);
 			const baseColor = playerColors[i];
-			gradientFill.addColorStop(0, lighten(baseColor, 0.15));
-			gradientFill.addColorStop(0.5, baseColor);
-			gradientFill.addColorStop(1, mix(baseColor, 0x000000, 0.15));
+			const gradientFill = new PIXI.FillGradient({
+				type: 'linear',
+				start: { x: 0, y: 0 },
+				end: { x: 1, y: 1 },
+				colorStops: [
+					{ offset: 0, color: lighten(baseColor, 0.15) },
+					{ offset: 0.5, color: baseColor },
+					{ offset: 1, color: mix(baseColor, 0x000000, 0.15) },
+				],
+				textureSpace: 'local',
+			});
 
 			graphics.roundRect(0 - overlappingBorder, 0 - overlappingBorder, width + overlappingBorder * 2, height + overlappingBorder * 2, radius)
 				.fill({ fill: gradientFill, alpha });
@@ -1838,9 +1888,16 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 		const buttonRadius = D.CELL_HEIGHT * 1.2;
 
 		// Create a subtle gradient for the center button
-		const buttonGradient = new PIXI.FillGradient(-width / 2, -width / 2, width / 2, width / 2);
-		buttonGradient.addColorStop(0, lighten(regularCellColor, 0.12));
-		buttonGradient.addColorStop(1, mix(regularCellColor, 0x000000, 0.1));
+		const buttonGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0, y: 0 },
+			end: { x: 1, y: 1 },
+			colorStops: [
+				{ offset: 0, color: lighten(regularCellColor, 0.12) },
+				{ offset: 1, color: mix(regularCellColor, 0x000000, 0.1) },
+			],
+			textureSpace: 'local',
+		});
 
 		this.startGameButtonGraphics.roundRect(-width / 2, -width / 2, width, width, buttonRadius)
 			.fill(buttonGradient);
@@ -1880,8 +1937,11 @@ export class GameBoardMenu extends GameBoardBase implements OnResize {
 export class Cog extends PIXI.Container implements OnResize {
 
 	cogSprite: PIXI.Sprite;
+	cogBehavior: ButtonBehaviorContainer;
 	muteSprite: PIXI.Sprite;
+	muteBehavior: ButtonBehaviorContainer;
 	fullscreenSprite: PIXI.Sprite;
+	fullscreenBehavior: ButtonBehaviorContainer;
 
 	renderer: PIXI.Renderer;
 	gameBoardBase: GameBoardBase;
@@ -1893,13 +1953,12 @@ export class Cog extends PIXI.Container implements OnResize {
 		this.renderer = gameBoardBase.renderer;
 		this.gameBoardBase = gameBoardBase;
 
-		this.cogSprite = PIXI.Sprite.from(IMAGE_ALIASES["cog"]);
+		this.cogSprite = new PIXI.Sprite(PIXI.Texture.from(IMAGE_ALIASES["cog"]));
 		this.cogSprite.anchor.set(0.5, 0.5);
 		this.cogSprite.blendMode = 'add-npm';
-		//this.cogSprite.tint = cogColor
 		this.addChild(this.cogSprite);
 
-		this.cogSprite.addChild(new class extends ButtonBehaviorContainer {
+		this.cogBehavior = new class extends ButtonBehaviorContainer {
 			owner: Cog;
 
 			constructor(owner: Cog) {
@@ -1920,7 +1979,8 @@ export class Cog extends PIXI.Container implements OnResize {
 			hoverChanged(): void {
 				this.owner.cogSprite.alpha = this.isHovered() ? 1 : 0.8;
 			}
-		}(this));
+		}(this);
+		this.addChild(this.cogBehavior);
 
 		this.menu = new Menu(this, gameBoardBase.sounds);
 		this.menu.visible = false;
@@ -1930,7 +1990,8 @@ export class Cog extends PIXI.Container implements OnResize {
 		this.muteSprite.anchor.set(0.5, 0.5);
 		this.muteSprite.blendMode = 'add-npm';
 		this.addChild(this.muteSprite);
-		this.muteSprite.addChild(new class extends ButtonBehaviorContainer {
+
+		this.muteBehavior = new class extends ButtonBehaviorContainer {
 			owner: Cog;
 
 			constructor(owner: Cog) {
@@ -1953,14 +2014,16 @@ export class Cog extends PIXI.Container implements OnResize {
 				return true;
 			}
 
-		}(this));
+		}(this);
+		this.addChild(this.muteBehavior);
 
 		// Fullscreen toggle button
 		this.fullscreenSprite = new PIXI.Sprite();
 		this.fullscreenSprite.anchor.set(0.5, 0.5);
 		this.fullscreenSprite.alpha = 0.8;
 		this.addChild(this.fullscreenSprite);
-		this.fullscreenSprite.addChild(new class extends ButtonBehaviorContainer {
+
+		this.fullscreenBehavior = new class extends ButtonBehaviorContainer {
 			owner: Cog;
 
 			constructor(owner: Cog) {
@@ -1982,7 +2045,8 @@ export class Cog extends PIXI.Container implements OnResize {
 				return true;
 			}
 
-		}(this));
+		}(this);
+		this.addChild(this.fullscreenBehavior);
 
 		this.setupFullscreenListener();
 		this.onResize(OnResizeFlag.ALL);
@@ -2048,25 +2112,21 @@ export class Cog extends PIXI.Container implements OnResize {
 		const cogGap = this.getCogGap();
 
 		this.cogSprite.position.set(viewportSize.x - this.cogSprite.width / 2 - cogGap, this.cogSprite.height / 2 + cogGap);
-
-		// GOTCHA: Parent's scale makes child scale smaller correspondingly. This also affects hitArea
-		this.cogSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
-			(this.cogSprite.width / 2) / this.cogSprite.scale.x,
-			(this.cogSprite.height / 2) / this.cogSprite.scale.y);
+		this.cogBehavior.position.copyFrom(this.cogSprite.position);
+		this.cogBehavior.hitArea = new PIXI.Ellipse(0, 0, this.cogSprite.width / 2, this.cogSprite.height / 2);
 
 		this.muteSprite.texture = this.gameBoardBase.sounds.isMuted() ? PIXI.Texture.from(IMAGE_ALIASES["sound-off"]) : PIXI.Texture.from(IMAGE_ALIASES["sound-on"]);
 		this.muteSprite.width = width;
 		this.muteSprite.height = width;
 		this.muteSprite.position.set(this.cogSprite.width / 2 + cogGap, cogGap + this.cogSprite.height / 2);
+		this.muteBehavior.position.copyFrom(this.muteSprite.position);
+		this.muteBehavior.hitArea = new PIXI.Ellipse(0, 0, this.muteSprite.width / 2, this.muteSprite.height / 2);
 
-		this.muteSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
-			(this.muteSprite.width / 2) / this.muteSprite.scale.x,
-			(this.muteSprite.height / 2) / this.muteSprite.scale.y);
-
-		// Fullscreen icon (using Phosphor icons) - bottom right corner
+		// Fullscreen icon - bottom right corner
 		// Only show if Fullscreen API is supported (not on iOS)
 		if (this.isFullscreenSupported()) {
 			this.fullscreenSprite.visible = true;
+			this.fullscreenBehavior.visible = true;
 			const isFullscreen = !!document.fullscreenElement;
 			this.fullscreenSprite.texture = isFullscreen
 				? PIXI.Texture.from(IMAGE_ALIASES["fullscreen-exit"])
@@ -2077,12 +2137,11 @@ export class Cog extends PIXI.Container implements OnResize {
 				viewportSize.x - cogGap - width / 2,
 				viewportSize.y - cogGap - width / 2
 			);
-
-			this.fullscreenSprite.getChildAt(0).hitArea = new PIXI.Ellipse(0, 0,
-				(this.fullscreenSprite.width / 2) / this.fullscreenSprite.scale.x,
-				(this.fullscreenSprite.height / 2) / this.fullscreenSprite.scale.y);
+			this.fullscreenBehavior.position.copyFrom(this.fullscreenSprite.position);
+			this.fullscreenBehavior.hitArea = new PIXI.Ellipse(0, 0, this.fullscreenSprite.width / 2, this.fullscreenSprite.height / 2);
 		} else {
 			this.fullscreenSprite.visible = false;
+			this.fullscreenBehavior.visible = false;
 		}
 
 		if (this.menu.visible) {
@@ -2128,9 +2187,16 @@ export class Menu extends PIXI.Container implements OnResize {
 		this.graphics.clear();
 
 		// Create subtle gradient for menu overlay
-		const menuGradient = new PIXI.FillGradient(viewportSize.x / 2, 0, viewportSize.x / 2, viewportSize.y);
-		menuGradient.addColorStop(0, rgb('rgb(100,105,115)'));
-		menuGradient.addColorStop(1, rgb('rgb(70,75,85)'));
+		const menuGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0.5, y: 0 },
+			end: { x: 0.5, y: 1 },
+			colorStops: [
+				{ offset: 0, color: rgb('rgb(100,105,115)') },
+				{ offset: 1, color: rgb('rgb(70,75,85)') },
+			],
+			textureSpace: 'local',
+		});
 
 		this.graphics.roundRect(bgGap, bgGap,
 			viewportSize.x - bgGap * 2,
@@ -2163,7 +2229,7 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.graphics = new PIXI.Graphics();
 		this.addChild(this.graphics);
 
-		this.sprite = PIXI.Sprite.from(IMAGE_ALIASES["settings-restart"]);
+		this.sprite = new PIXI.Sprite(PIXI.Texture.from(IMAGE_ALIASES["settings-restart"]));
 		this.sprite.tint = bgColor;
 		this.addChild(this.sprite);
 		this.graphics.addChild(new class extends ButtonBehaviorContainer {
@@ -2214,9 +2280,16 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		const buttonRadius = D.CELL_HEIGHT / 1.8;
 
 		// Create gradient for restart button
-		const buttonGradient = new PIXI.FillGradient(viewportSize.x - width - gap * 2 - buttonW, gap, viewportSize.x - width - gap * 2, gap + buttonH);
-		buttonGradient.addColorStop(0, lighten(settingsButtonsColor, 0.1));
-		buttonGradient.addColorStop(1, settingsButtonsColor);
+		const buttonGradient = new PIXI.FillGradient({
+			type: 'linear',
+			start: { x: 0, y: 0 },
+			end: { x: 1, y: 1 },
+			colorStops: [
+				{ offset: 0, color: lighten(settingsButtonsColor, 0.1) },
+				{ offset: 1, color: settingsButtonsColor },
+			],
+			textureSpace: 'local',
+		});
 
 		this.graphics.roundRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, buttonRadius)
 			.fill(buttonGradient);

@@ -205,8 +205,8 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 	// 	}
 	// }
 
-	if (window.DeviceOrientationEvent) {
-		window.addEventListener("deviceorientation", (_e) => { onResize(null); }, false);
+	if (screen.orientation) {
+		screen.orientation.addEventListener('change', () => { onResize(null); });
 	}
 
 	app.renderer.render(stage);
