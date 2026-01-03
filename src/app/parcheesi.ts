@@ -841,7 +841,7 @@ interface MoveResult {
 	bonus: number; // 0 if no bonus, corresponding bonus otherwise
 }
 
-export class GameBoardBase extends PIXI.Graphics implements OnResize {
+export class GameBoardBase extends PIXI.Container implements OnResize {
 	restartGameCallback: (arg0: Array<boolean>) => void;
 
 	public renderer: PIXI.Renderer;
@@ -2216,6 +2216,7 @@ export class RestartButton extends PIXI.Container implements OnResize {
 
 	graphics: PIXI.Graphics;
 	sprite: PIXI.Sprite;
+	button: ButtonBehaviorContainer;
 
 	private _sounds: Sounds;
 	get sounds() {
@@ -2232,7 +2233,7 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.sprite = new PIXI.Sprite(PIXI.Texture.from(IMAGE_ALIASES["settings-restart"]));
 		this.sprite.tint = bgColor;
 		this.addChild(this.sprite);
-		this.graphics.addChild(new class extends ButtonBehaviorContainer {
+		this.button = new class extends ButtonBehaviorContainer {
 			owner: RestartButton;
 
 			constructor(owner: RestartButton) {
@@ -2254,7 +2255,8 @@ export class RestartButton extends PIXI.Container implements OnResize {
 				return true;
 			}
 
-		}(this));
+		}(this);
+		this.addChild(this.button);
 		this.onResize(OnResizeFlag.ALL);
 	}
 
@@ -2294,7 +2296,7 @@ export class RestartButton extends PIXI.Container implements OnResize {
 		this.graphics.roundRect(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH, buttonRadius)
 			.fill(buttonGradient);
 
-		this.graphics.getChildAt(0).hitArea = new PIXI.Rectangle(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH);
+		this.button.hitArea = new PIXI.Rectangle(viewportSize.x - width - gap * 2 - buttonW, gap, buttonW, buttonH);
 	}
 
 }
