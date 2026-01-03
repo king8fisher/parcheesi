@@ -10,25 +10,46 @@ export type Sounds = {
 };
 
 export const initSounds = (): Sounds => {
-  // ------------ sounds ----------------------------------------
   const sounds: Record<string, Howl> = {};
   const GLOBAL_VOLUME = 0.5;
-  let CURRENT_VOLUME = 0; // Start with sound disabled
-  let audioContextUnlocked = false;
+  let CURRENT_VOLUME = 0;
+  let soundsLoaded = false;
 
-  // Let Howler handle unlocking audio on first user interaction (required for mobile)
+  // Don't initialize AudioContext until user interaction
   Howler.autoUnlock = true;
-  // Initially we always mute (will be unmuted when user enables sound)
-  Howler.volume(0);
+
+  function loadAllSounds() {
+    if (soundsLoaded) return;
+    soundsLoaded = true;
+
+    // MP3 first for iOS Safari compatibility
+    const DICE_SOUND_COUNT = 29;
+    for (let i = 0; i < DICE_SOUND_COUNT; i++) {
+      loadSound(`dice-${i}`, [`/sounds/dice/dice-${i}.mp3`, `/sounds/dice/dice-${i}.webm`], 0.3);
+    }
+
+    const PIECE_SOUND_COUNT = 8;
+    for (let i = 0; i < PIECE_SOUND_COUNT; i++) {
+      loadSound(`piece-${i}`, [`/sounds/piece/piece-${i}.mp3`, `/sounds/piece/piece-${i}.webm`], 0.5);
+    }
+    loadSound('wrong', ['/sounds/wrong.mp3', '/sounds/wrong.webm'], 0.5);
+    loadSound('tada', ['/sounds/tada.mp3', '/sounds/tada.webm'], 0.8);
+    loadSound('bonus', ['/sounds/bonus.mp3', '/sounds/bonus.webm'], 0.5);
+    loadSound('sweep', ['/sounds/sweep.mp3', '/sounds/sweep.webm'], 0.3);
+    loadSound('click', ['/sounds/click.mp3', '/sounds/click.webm'], 0.3);
+    loadSound('select', ['/sounds/select.mp3', '/sounds/select.webm'], 0.3);
+  }
+
+  function unlockAndLoad() {
+    // Resume AudioContext if suspended (required for mobile)
+    if (Howler.ctx && Howler.ctx.state === 'suspended') {
+      Howler.ctx.resume().catch(() => {});
+    }
+    loadAllSounds();
+  }
 
   function unmuteIfVolumeUp() {
-    // On mobile, the AudioContext must be resumed during a user gesture
-    if (!audioContextUnlocked && Howler.ctx && Howler.ctx.state === 'suspended') {
-      Howler.ctx.resume().then(() => {
-        audioContextUnlocked = true;
-      }).catch(() => {});
-    }
-    audioContextUnlocked = true;
+    unlockAndLoad();
     Howler.volume(CURRENT_VOLUME);
   }
 
@@ -41,22 +62,8 @@ export const initSounds = (): Sounds => {
     return CURRENT_VOLUME == 0;
   }
 
-  // MP3 first for iOS Safari compatibility (doesn't support webm)
   const DICE_SOUND_COUNT = 29;
-  for (let i = 0; i < DICE_SOUND_COUNT; i++) {
-    loadSound(`dice-${i}`, [`/sounds/dice/dice-${i}.mp3`, `/sounds/dice/dice-${i}.webm`], 0.3);
-  }
-
   const PIECE_SOUND_COUNT = 8;
-  for (let i = 0; i < PIECE_SOUND_COUNT; i++) {
-    loadSound(`piece-${i}`, [`/sounds/piece/piece-${i}.mp3`, `/sounds/piece/piece-${i}.webm`], 0.5);
-  }
-  loadSound('wrong', ['/sounds/wrong.mp3', '/sounds/wrong.webm'], 0.5);
-  loadSound('tada', ['/sounds/tada.mp3', '/sounds/tada.webm'], 0.8);
-  loadSound('bonus', ['/sounds/bonus.mp3', '/sounds/bonus.webm'], 0.5);
-  loadSound('sweep', ['/sounds/sweep.mp3', '/sounds/sweep.webm'], 0.3);
-  loadSound('click', ['/sounds/click.mp3', '/sounds/click.webm'], 0.3);
-  loadSound('select', ['/sounds/select.mp3', '/sounds/select.webm'], 0.3);
 
   function loadSound(name: string, url: string | string[], volume: number) {
     const s = new Howl({
@@ -65,16 +72,11 @@ export const initSounds = (): Sounds => {
       preload: true,
       loop: false,
       volume: volume,
-      html5: true, // Required for iOS Safari compatibility
+      html5: false, // Use Web Audio API for better pooling
       onplayerror: function () {
         if (Howler.volume() > 0) {
           if (Howler.ctx && Howler.ctx.state == "suspended") {
-            Howler.ctx.resume().then(
-              () => {
-                s.play();
-              }
-            ).catch(() => {
-            });
+            Howler.ctx.resume().then(() => s.play()).catch(() => {});
           }
           s.once('unlock', function () {
             s.play();
@@ -86,9 +88,11 @@ export const initSounds = (): Sounds => {
   }
 
   function playSound(name: string, randomRate: boolean = false) {
-    //sound.play('wrong', {loop: false, volume: WRONG_VOLUME})
-    sounds[name].rate(randomRate ? 1 + (Math.random() * 0.3 - 0.15) : 1);
-    sounds[name].play();
+    if (!soundsLoaded) return; // Sounds not ready yet
+    const sound = sounds[name];
+    if (!sound) return;
+    sound.rate(randomRate ? 1 + (Math.random() * 0.3 - 0.15) : 1);
+    sound.play();
   }
 
   return {
