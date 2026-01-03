@@ -19,6 +19,7 @@ import {
 	WH_IMAGE_RATIO
 } from "./main";
 
+import { FuzzyElement, FuzzyHitManager } from "./fuzzy-hit";
 import { Sounds } from "./sounds";
 import { tweenFunctions } from "./util";
 
@@ -931,6 +932,12 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 	cog: Cog;
 
+	// Fuzzy hit detection
+	private fuzzyManager: FuzzyHitManager = new FuzzyHitManager();
+	private hitInterceptor: PIXI.Container = new PIXI.Container();
+	private fuzzyDownElement: FuzzyElement | null = null;
+	private fuzzyHoveredElement: FuzzyElement | null = null;
+
 	pieceSelected: Piece | null = null;
 
 	startGameButton: ButtonBehaviorContainer;
@@ -1072,12 +1079,127 @@ export class GameBoard extends GameBoardBase implements OnResize {
 		this.startGameButton.addChild(text);
 		this.addChild(this.startGameButton);
 
+		// Setup fuzzy hit detection (must be before cog so cog stays on top)
+		this.setupFuzzyHitDetection();
+
 		this.cog = new Cog(this);
 		this.addChild(this.cog);
 
 		this.onResize(OnResizeFlag.ALL);
 
 		this.adjustWhoGoes();
+	}
+
+	private setupFuzzyHitDetection() {
+		// Disable native events on pieces, dices, skip
+		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
+			for (let i = 0; i < PIECES_PER_COLOR; i++) {
+				const piece = this.pieces[colorIndex][i];
+				piece.button.eventMode = 'none';
+				piece.button.interactive = false;
+			}
+		}
+		for (let diceIndex = 0; diceIndex < 2; diceIndex++) {
+			this.dices[diceIndex].button.eventMode = 'none';
+			this.dices[diceIndex].button.interactive = false;
+		}
+		this.skip.button.eventMode = 'none';
+		this.skip.button.interactive = false;
+
+		// Register pieces with fuzzy manager
+		for (let colorIndex = 0; colorIndex < 4; colorIndex++) {
+			for (let i = 0; i < PIECES_PER_COLOR; i++) {
+				const piece = this.pieces[colorIndex][i];
+				this.fuzzyManager.register({
+					container: piece,
+					button: piece.button,
+					getCenterGlobal: () => piece.getGlobalPosition(),
+					getExpandedRadius: () => D.CELL_HEIGHT // 2x original (D.CELL_HEIGHT/2)
+				});
+			}
+		}
+
+		// Register dices
+		for (let diceIndex = 0; diceIndex < 2; diceIndex++) {
+			const dice = this.dices[diceIndex];
+			this.fuzzyManager.register({
+				container: dice,
+				button: dice.button,
+				getCenterGlobal: () => dice.getGlobalPosition(),
+				getExpandedRadius: () => D.CELL_HEIGHT * 2 // 2x original (D.CELL_HEIGHT)
+			});
+		}
+
+		// Register skip
+		this.fuzzyManager.register({
+			container: this.skip,
+			button: this.skip.button,
+			getCenterGlobal: () => this.skip.getGlobalPosition(),
+			// Skip is a rectangle, use max dimension for radius approximation
+			getExpandedRadius: () => Math.max(D.CELL_WIDTH, D.CELL_HEIGHT)
+		});
+
+		// Setup hit interceptor
+		const viewportSize = D.getViewportSize(this.renderer);
+		this.hitInterceptor.eventMode = 'static';
+		this.hitInterceptor.hitArea = new PIXI.Rectangle(0, 0, viewportSize.x, viewportSize.y);
+		this.hitInterceptor.cursor = 'default';
+		this.addChild(this.hitInterceptor);
+
+		// Bind event handlers
+		this.hitInterceptor.on('pointerdown', this.onFuzzyPointerDown.bind(this));
+		this.hitInterceptor.on('pointermove', this.onFuzzyPointerMove.bind(this));
+		this.hitInterceptor.on('pointerup', this.onFuzzyPointerUp.bind(this));
+		this.hitInterceptor.on('pointerupoutside', this.onFuzzyPointerUp.bind(this));
+	}
+
+	private onFuzzyPointerDown(e: PIXI.FederatedPointerEvent) {
+		e.stopPropagation();
+		this.sounds.unmuteIfVolumeUp();
+		const closest = this.fuzzyManager.findClosest(e.global);
+		if (closest && closest.button.isAllowedToClick()) {
+			this.fuzzyDownElement = closest;
+			// Simulate button down state
+			closest.button.onButtonDown();
+		}
+	}
+
+	private onFuzzyPointerMove(e: PIXI.FederatedPointerEvent) {
+		const closest = this.fuzzyManager.findClosestAny(e.global);
+
+		// Update cursor
+		if (closest && closest.button.isAllowedToClick()) {
+			this.hitInterceptor.cursor = 'pointer';
+		} else {
+			this.hitInterceptor.cursor = 'default';
+		}
+
+		// Update hover state
+		if (this.fuzzyHoveredElement !== closest) {
+			// Unhover old element
+			if (this.fuzzyHoveredElement) {
+				this.fuzzyHoveredElement.button.onButtonOut();
+			}
+			// Hover new element
+			if (closest) {
+				closest.button.onButtonOver();
+			}
+			this.fuzzyHoveredElement = closest;
+		}
+	}
+
+	private onFuzzyPointerUp(_e: PIXI.FederatedPointerEvent) {
+		if (!this.fuzzyDownElement) return;
+
+		// Trigger click on the element we pressed down on
+		if (this.fuzzyDownElement.button.isAllowedToClick()) {
+			this.fuzzyDownElement.button.clickHappened();
+		}
+
+		// Clean up button state without triggering click again
+		// Don't call onButtonUp() since it may call clickHappened() again
+		ButtonBehaviorContainer.CancelAll();
+		this.fuzzyDownElement = null;
 	}
 
 
@@ -1510,6 +1632,9 @@ export class GameBoard extends GameBoardBase implements OnResize {
 
 		const viewportSize = D.getViewportSize(this.renderer);
 
+		// Update hit interceptor area on resize
+		this.hitInterceptor.hitArea = new PIXI.Rectangle(0, 0, viewportSize.x, viewportSize.y);
+
 		const graphics = <PIXI.Graphics>this.startGameButton.getChildAt(0);
 		graphics.clear();
 		const width = D.CELL_WIDTH * 3 - D.CELL_HEIGHT * 2 - D.CELL_GAP * 4;
@@ -1880,7 +2005,7 @@ export class Cog extends PIXI.Container implements OnResize {
 		// Check if Fullscreen API is available (not supported on iOS Safari)
 		return !!(
 			document.documentElement.requestFullscreen ||
-			(document.documentElement as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen
+			(document.documentElement as unknown as { webkitRequestFullscreen?: () => void; }).webkitRequestFullscreen
 		) && document.fullscreenEnabled !== false;
 	}
 

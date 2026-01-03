@@ -34,7 +34,7 @@
   // "javascript.suggest.paths": true,
   // "typescript.suggest.paths": true,
   "javascript.updateImportsOnFileMove.enabled": "prompt",
-  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.inlayHints.enumMemberValues.enabled": true,
   "typescript.inlayHints.enumMemberValues.enabled": true,
   "javascript.inlayHints.functionLikeReturnTypes.enabled": true,

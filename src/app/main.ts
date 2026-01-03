@@ -155,7 +155,7 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		const newResolution = window.devicePixelRatio;
 		const newWidth = document.body.clientWidth; // window.innerWidth
 		const newHeight = document.body.clientHeight; //window.innerHeight
-		const newOrientation = (screen.orientation || {}).type || (screen as unknown as { mozOrientation?: string }).mozOrientation || (screen as unknown as { msOrientation?: string }).msOrientation;
+		const newOrientation = (screen.orientation || {}).type || (screen as unknown as { mozOrientation?: string; }).mozOrientation || (screen as unknown as { msOrientation?: string; }).msOrientation;
 		const changed = (newResolution != savedResolution)
 			|| (newWidth != savedWidth)
 			|| (newHeight != savedHeight)
@@ -209,6 +209,5 @@ const beginGame = (app: PIXI.Application, stage: PIXI.Container, sounds: Sounds)
 		window.addEventListener("deviceorientation", (_e) => { onResize(null); }, false);
 	}
 
-	//console.log(PIXI.utils.TextureCache)
 	app.renderer.render(stage);
 };
