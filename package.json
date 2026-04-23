@@ -15,30 +15,40 @@
   },
   "dependencies": {
     "howler": "^2.2.4",
-    "next": "16.1.1",
-    "pixi.js": "^8.14.3",
+    "next": "16.2.4",
+    "pixi.js": "^8.18.1",
     "precise-colors": "^1.1.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/eslintrc": "^3.3.5",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/howler": "^2.2.12",
-    "@types/node": "^20.19.27",
-    "@types/react": "19.2.7",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.1",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.4",
     "eslint-plugin-no-in-array": "^1.2.1",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3"
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3"
   },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf",
+  "packageManager": "pnpm@10.33.1+sha512.05ba3c1d5d1c18f68df06470d74055e62d41fc110a0c660db1b2dfb2785327f04cf0f68345d4609bc52089e7fa0343c31593b2f9594e2c5d5da426230acc9820",
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.7",
-      "@types/react-dom": "19.2.3"
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3",
+      "typescript-eslint": "^8.59.0",
+      "@typescript-eslint/parser": "^8.59.0",
+      "@typescript-eslint/eslint-plugin": "^8.59.0",
+      "@typescript-eslint/utils": "^8.59.0",
+      "@typescript-eslint/type-utils": "^8.59.0",
+      "@typescript-eslint/typescript-estree": "^8.59.0",
+      "@typescript-eslint/project-service": "^8.59.0",
+      "@typescript-eslint/tsconfig-utils": "^8.59.0",
+      "eslint-plugin-react-hooks": "^7.1.1"
     }
   }
 }
