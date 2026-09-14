@@ -12,7 +12,7 @@ single device; now evolving toward online multiplayer.
 - Bootstrap: `src/app/main.ts` wires the renderer, loads assets, creates the menu/game lifecycle.
 - Canvas host: `src/components/GameCanvas.tsx`.
 - Package manager: **pnpm** (via `mise` + corepack). Do not use `npm` or `yarn`.
-- Node: pinned to `22` by `mise.toml`.
+- Node: pinned to `24` by `mise.toml`.
 
 ## Commands
 
